@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<title>Detour</title>
+<meta name="description" content="Detour — the scheduler for the LA Era plan.">
+<meta name="theme-color" content="#101315">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Detour">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700&family=Newsreader:ital,opsz,wght@0,6..72,300;0,6..72,400;1,6..72,300&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app">
+  <header id="topbar">
+    <div class="tb-left">
+      <div class="wm">Detour</div>
+      <div class="tb-sub" id="tbsub">LA Era</div>
+    </div>
+    <div class="tb-right">
+      <button class="iconbtn" id="btn-capture" aria-label="Quick capture">＋</button>
+      <button class="iconbtn" id="btn-menu" aria-label="Menu">☰</button>
+    </div>
+  </header>
+
+  <main id="view" tabindex="-1"></main>
+
+  <nav id="tabs" role="tablist">
+    <button class="tab" data-view="today" role="tab"><span class="ti">◉</span><span>Today</span></button>
+    <button class="tab" data-view="week" role="tab"><span class="ti">▤</span><span>Week</span></button>
+    <button class="tab" data-view="sunday" role="tab"><span class="ti">◐</span><span>Plan</span></button>
+    <button class="tab" data-view="goals" role="tab"><span class="ti">◆</span><span>Goals</span></button>
+    <button class="tab" data-view="routines" role="tab"><span class="ti">✓</span><span>Routines</span></button>
+  </nav>
+</div>
+
+<div id="sheet" class="sheet" hidden>
+  <div class="sheet-backdrop" data-close></div>
+  <div class="sheet-panel" role="dialog" aria-modal="true">
+    <div class="sheet-head">
+      <h2 id="sheet-title">—</h2>
+      <button class="iconbtn" data-close aria-label="Close">✕</button>
+    </div>
+    <div class="sheet-body" id="sheet-body"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script src="seed.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
