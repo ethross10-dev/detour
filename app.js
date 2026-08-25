@@ -14,6 +14,9 @@ function freshState() {
     createdAt: new Date().toISOString(),
     theme: "auto",
     wwwMode: "day",
+    stamps: {},        /* record key -> last edit time, for sync merging */
+    tombs: {},         /* record key -> deletion time */
+    clock: 0,          /* logical clock, so device skew can't reorder edits */
     projects: clone(seed.projects),
     sliders: clone(seed.sliders),
     milestones: clone(seed.milestones),
@@ -82,11 +85,16 @@ function migrate() {
   if (!S.tasks) S.tasks = [];
   if (!S.blockRoutines) S.blockRoutines = {};
   if (!S.wwwMode) S.wwwMode = "day";
+  if (!S.stamps) S.stamps = {};
+  if (!S.tombs) S.tombs = {};
+  if (!S.clock) S.clock = 0;
 }
 var saveTimer = null;
 function save() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(function () {
+    /* sync.js, if loaded, stamps what changed before we write */
+    if (window.DETOUR && window.DETOUR.onSave) { try { window.DETOUR.onSave(); } catch (e) {} }
     try { localStorage.setItem(KEY, JSON.stringify(S)); }
     catch (e) { toast("Could not save — storage full or blocked"); }
   }, 120);
@@ -1440,6 +1448,12 @@ function openMenu() {
     stats.appendChild(h("div", "dim", gradDays + " days to Anderson graduation."));
     body.appendChild(stats);
 
+    body.appendChild(menuBtn("Sync",
+      window.DETOUR && window.DETOUR.syncStatusLine ? window.DETOUR.syncStatusLine() : "Not available",
+      function () {
+        if (window.DETOUR && window.DETOUR.syncPanel) window.DETOUR.syncPanel();
+        else toast("sync.js did not load");
+      }));
     body.appendChild(menuBtn("Weekly template", "The recurring blocks that generate every week", editTemplates));
     body.appendChild(menuBtn("All open tasks", S.tasks.filter(function (t) { return !t.done; }).length + " across every slider", function () {
       var open = S.tasks.filter(function (t) { return !t.done; }).sort(function (a, b) {
@@ -1991,6 +2005,16 @@ on(document.getElementById("btn-menu"), "click", openMenu);
 on(document.getElementById("btn-capture"), "click", function () { openAssistant(); });
 document.addEventListener("keydown", function (e) { if (e.key === "Escape") closeSheet(); });
 window.addEventListener("resize", syncTopbarH);
+
+/* ---- seam for sync.js: it needs to read, replace and redraw the state ---- */
+window.DETOUR = {
+  get state() { return S; },
+  setState: function (next) { S = next; migrate(); save(); },
+  save: save, render: render, toast: toast,
+  openSheet: openSheet, closeSheet: closeSheet,
+  h: h, on: on, esc: esc, uid: uid,
+  onSave: null            /* sync.js assigns this */
+};
 
 /* re-render on the hour so "right now" stays honest */
 setInterval(function () { if (view === "today") render(); }, 60000);

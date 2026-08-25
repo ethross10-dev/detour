@@ -127,16 +127,56 @@ Adding them now is the failure mode the whole audit was about.
 
 ## Your data
 
-Everything lives in this browser's `localStorage` under `detour.app.v1`. It never leaves the
-device — there is no server to send it to.
+Everything lives in this browser's `localStorage` under `detour.app.v1`. By default it never
+leaves the device.
 
 Two consequences worth knowing:
 
 - The home-screen app and a Safari tab can keep **separate** copies. Pick one and stay in it.
-- Use **☰ → Export data** before you switch devices or redeploy anything major. Import
-  restores it.
+- Use **☰ → Export data** before you redeploy anything major. Import restores it.
 
 `☰ → Reset to plan` wipes your local changes and reloads the original field-plan seed.
+
+---
+
+## Sync (optional — ☰ → Sync)
+
+Off until you turn it on. Once on, every device merges into a single **secret GitHub gist**,
+so ticking a block on the phone shows up on the laptop and vice versa.
+
+**Setup, once per device**
+
+1. GitHub → *Settings → Developer settings → Personal access tokens → Fine-grained tokens*.
+   Set an expiry, and under **Account permissions** set **Gists: Read and write**. Nothing
+   else. Paste it in.
+2. Choose a passphrase. Use the **same one on every device**.
+3. First device: **Create a new secret gist**. Every device after: copy the gist ID shown in
+   the panel and use **Connect to an existing gist**.
+
+**How the merge works.** Not last-file-wins — per record. Each task, block tick, routine tick,
+note and template carries a timestamp, and the newest edit to *each individual record* wins.
+An evening of ticking blocks on the phone and an afternoon of adding tasks on the laptop both
+survive. Deletes leave a tombstone so they don't come back on the next pull, but a *newer*
+edit beats an older delete — losing work is the worse failure.
+
+Timestamps are also a logical counter, so anything you edit after seeing the other device's
+state sorts after it even if the two clocks disagree. Tested against a device running ten
+minutes slow.
+
+**Encryption.** A "secret" gist is unlisted, not private: anyone holding the URL can read it.
+With a passphrase set, the file is encrypted in the browser (AES-GCM, PBKDF2) before it
+leaves, so the URL alone is worthless. Lose the passphrase and the *remote* copy is
+unreadable — your local copy is untouched, but you'd start the gist over. Encryption needs a
+secure origin: the GitHub Pages URL or `localhost`, **not** the bare `192.168.x.x` address.
+
+**What syncs.** Milestones, tasks, templates, routines, 90-day objectives, notes, block ticks
+and notes, routine ticks, week plans, block routines, skipped and one-off blocks, and your
+theme. Projects, sliders, releases and Memento dates come from `seed.js` — they change on
+deploy, not on a device, so they are not synced.
+
+**Cadence.** Pushes a few seconds after an edit, pulls when you return to the app or come back
+online. Every push is a pull-merge-push, so two devices can't clobber each other. Offline it
+simply keeps working and catches up later.
 
 ---
 
@@ -145,7 +185,10 @@ Two consequences worth knowing:
 - `seed.js` — all your content: projects, sliders, milestones, block template, routines,
   release dates, Memento dates. Change a date or add a milestone here and it appears on a
   fresh install. Existing installs keep their own copy — reset or edit in-app.
-- `app.js` — one file, no framework, no bundler. Views are functions at the bottom half.
+- `app.js` — no framework, no bundler. Views are functions in the lower half. It exposes a
+  small `window.DETOUR` seam at the end so sync can read, replace and redraw the state.
+- `sync.js` — the optional gist sync: flatten → stamp → merge → unflatten, plus the setup
+  panel. Deleting this file disables sync and breaks nothing else.
 - `styles.css` — CSS variables at the top control the whole palette, light and dark.
 - `sw.js` — the offline cache. Bump `CACHE` on every deploy or installed copies keep serving
   the old files. `./publish.sh "what changed"` does the bump, commit and push for you.
