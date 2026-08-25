@@ -150,8 +150,17 @@ so ticking a block on the phone shows up on the laptop and vice versa.
    Set an expiry, and under **Account permissions** set **Gists: Read and write**. Nothing
    else. Paste it in.
 2. Choose a passphrase. Use the **same one on every device**.
-3. First device: **Create a new secret gist**. Every device after: copy the gist ID shown in
-   the panel and use **Connect to an existing gist**.
+3. First device: name it whatever you like and hit **Create a new secret gist**. Every device
+   after: copy the gist ID shown in the panel and use **Connect to an existing gist** — it
+   accepts the bare ID or the full `gist.github.com/...` URL.
+
+**The name is cosmetic.** Detour finds the gist by its ID, which GitHub assigns and you cannot
+choose. Rename or re-describe the gist on GitHub whenever you like; nothing breaks. The ID is
+also the only thing protecting it, which is why the passphrase matters.
+
+You can point Detour at a gist you made by hand. It adds its own `detour-state.json` and
+leaves any other files in that gist alone. If the gist is **public**, the panel says so in red
+— a public gist is listed on your profile and readable by anyone.
 
 **How the merge works.** Not last-file-wins — per record. Each task, block tick, routine tick,
 note and template carries a timestamp, and the newest edit to *each individual record* wins.

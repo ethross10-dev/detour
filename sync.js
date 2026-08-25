@@ -47,6 +47,18 @@ function guessDevice() {
 var cfg = loadCfg();
 function configured() { return !!(cfg.token && cfg.gistId); }
 
+/* Accepts anything you might paste: a bare ID, the gist URL, a URL with a
+   trailing slash, or a /revisions link. The ID is the long hex segment. */
+function parseGistId(input) {
+  var s = String(input || "").trim().replace(/[#?].*$/, "");
+  if (!s) return "";
+  var parts = s.split("/").filter(Boolean);
+  for (var i = parts.length - 1; i >= 0; i--) {
+    if (/^[0-9a-f]{16,}$/i.test(parts[i])) return parts[i];
+  }
+  return parts.length ? parts[parts.length - 1] : "";
+}
+
 /* ========================= status ========================= */
 var status = { state: "off", msg: "", at: cfg.lastAt || null };
 function setStatus(state, msg) {
@@ -307,10 +319,13 @@ function api(path, opts) {
   });
 }
 
+var remotePublic = false;
+
 function pullRemote() {
   return api("/gists/" + cfg.gistId).then(function (g) {
+    remotePublic = !!g.public;
     var file = g.files && g.files[FILENAME];
-    if (!file) return null;
+    if (!file) return null;          /* fine — first push adds it, other files are left alone */
     var text = file.truncated
       ? fetch(file.raw_url).then(function (r) { return r.text(); })
       : Promise.resolve(file.content);
@@ -422,21 +437,28 @@ function openSyncPanel() {
 
         body.appendChild(h("div", "eyebrow", "3 · The gist"));
         body.appendChild(h("div", "muted",
-          "First device: create one. Every device after that: paste the same gist ID, shown here once it exists."));
+          "First device: create one and name it whatever you like — the name is only for you, " +
+          "Detour finds it by ID. Every device after that: paste that same ID (or the gist's URL)."));
+        var gname = h("input"); gname.type = "text";
+        gname.placeholder = "Detour — synced plan";
+        gname.value = cfg.gistName || "";
+        body.appendChild(field("Name it", gname));
         var gid = h("input"); gid.type = "text"; gid.placeholder = "paste an existing gist ID or URL";
-        body.appendChild(field("Gist ID", gid));
+        body.appendChild(field("…or connect to an existing gist", gid));
 
         var mk = h("button", "btn wide"); mk.textContent = "Create a new secret gist";
         on(mk, "click", function () {
           if (!tok.value.trim()) { D.toast("Token first"); return; }
           cfg.token = tok.value.trim();
           cfg.pass = pass.value || "";
+          cfg.gistName = gname.value.trim();
           saveCfg();
           mk.disabled = true; mk.textContent = "Creating…";
           var files = {};
           files[FILENAME] = { content: JSON.stringify({ app: "detour", v: 1, state: null }) };
           api("/gists", { method: "POST", body: JSON.stringify({
-            description: "Detour — synced plan (do not edit by hand)", public: false, files: files }) })
+            description: cfg.gistName || "Detour — synced plan (do not edit by hand)",
+            public: false, files: files }) })
             .then(function (g) {
               cfg.gistId = g.id; cfg.auto = true; saveCfg();
               return syncNow({ loud: true });
@@ -451,7 +473,7 @@ function openSyncPanel() {
 
         var join = h("button", "btn ghost wide"); join.textContent = "Connect to an existing gist";
         on(join, "click", function () {
-          var id = gid.value.trim().replace(/^https?:\/\/gist\.github\.com\/[^/]+\//, "").replace(/[#?].*$/, "");
+          var id = parseGistId(gid.value);
           if (!tok.value.trim() || !id) { D.toast("Token and gist ID"); return; }
           cfg.token = tok.value.trim(); cfg.pass = pass.value || ""; cfg.gistId = id; cfg.auto = true;
           saveCfg();
@@ -477,6 +499,16 @@ function openSyncPanel() {
         ? "Encrypted before upload. The other device needs the same passphrase."
         : "Not encrypted — anyone with the gist URL can read this. Add a passphrase below."));
       body.appendChild(idc);
+
+      if (remotePublic) {
+        var warn = h("div", "card");
+        warn.style.borderColor = "var(--bad)";
+        warn.appendChild(h("div", "eyebrow", "This gist is public"));
+        warn.appendChild(h("div", "muted", cfg.pass
+          ? "It is listed on your GitHub profile and anyone can find it. The contents are encrypted, but the fact of it is visible. Make a secret gist instead when you get a moment."
+          : "<b>Your whole plan is world-readable and searchable.</b> Delete this gist, create a secret one, and set a passphrase."));
+        body.appendChild(warn);
+      }
 
       var now = h("button", "btn wide"); now.textContent = "Sync now";
       on(now, "click", function () { syncNow({ loud: true }).then(rebuild); });

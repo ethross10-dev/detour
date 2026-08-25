@@ -1,5 +1,5 @@
 /* Detour service worker — offline-first shell, network-first for nothing else. */
-var CACHE = "detour-v3-sync";
+var CACHE = "detour-v4";
 var ASSETS = [
   "./", "./index.html", "./styles.css", "./app.js", "./sync.js", "./seed.js",
   "./manifest.webmanifest", "./icons/icon-180.png", "./icons/icon-192.png", "./icons/icon-512.png"
