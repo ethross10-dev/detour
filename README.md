@@ -1,6 +1,6 @@
 # Detour
 
-The scheduler for the LA Era plan. Seven projects, 53 milestones, 21 sliders, your weekly
+The scheduler for the LA Era plan. **WWW** — working while working — is the calendar it is built around. Seven projects, 53 milestones, 21 sliders, your weekly
 block template and your routines — all seeded from the field plan, all stored on your device.
 
 No accounts, no backend, no build step. It is plain HTML, CSS and one JavaScript file.
@@ -77,9 +77,31 @@ If you later decide you want it native, the same folder wraps unchanged in Capac
 milestone for that project), today's routines, and anything due in the next 30 days. When
 every block is ticked it tells you to close the laptop, which is the actual point.
 
-**Week** — all seven days, generated from your weekly template. Add, edit or skip anything
-for a single week without touching the template. Shows total hours blocked, with a warning
-line about what is realistically keepable during a heavy academic week.
+**WWW** — *Working While Working.* The calendar, and the reason the app exists. An Outlook-shaped
+day and week grid: hour gutter, half-hour lines, a red now-line, overlapping blocks packed
+side by side. Every block carries a **project** and a **slider**, and the slider name on the
+block is a link — tap it and you get that slider's **task list**: checkboxes, due dates, add
+a new one inline. Above the grid, a **Due** strip shows the tasks and milestones landing on
+each date. Tapping the block itself opens **the routine** (a repeating checklist that is the
+same every time that block runs, ticked fresh per instance — the Anderson Block ships with
+homework / Slack / email / announcements) plus that slider's open tasks. Week mode shows
+total hours blocked with a warning about what is realistically keepable in a heavy quarter.
+
+**The assistant** — `+` in the header, or the button under the calendar. Type it the way you'd
+say it, one thing per line:
+
+```
+Anderson productivity block tonight, 1 hour
+Email the EMA alumni director to find time to meet, due Wednesday
+StudioVault every Tuesday 7pm for 2 hours
+studio session with ttbby saturday 10:30am-1pm
+```
+
+It sorts each line into a **block**, a **task**, a **recurring block**, a **milestone** or a
+**note**, parses the date, time and duration, and guesses the slider from your own vocabulary
+(EMA, Otherside, ttbby, Juno, Frank Ocean, Logic, BCC…). Then it shows you every guess in an
+editable card before anything is written. It runs entirely on the device — no API key, no
+network, works on the subway. It *will* be wrong sometimes; the preview is the point.
 
 **Plan** — the Sunday ritual, in five steps: look back one week, pick workouts, pick meals,
 place blocks, name the one thing that matters. It reads back your completion rate from last
@@ -92,7 +114,7 @@ target date. Project cards hold the purpose, graduation mindset and every slider
 **Routines** — daily, weekly, monthly and twice-yearly, with automatic period resets and
 streaks on the daily ones. This is where the Memento's 23 Routines checklist items went.
 
-**Header** — `+` captures a note against a project. `☰` has the weekly template editor,
+**Header** — `+` opens the assistant. `☰` has the weekly template editor, all open tasks,
 your captured notes, Memento dates, theme, and **Export / Import**.
 
 ### Deliberately not in v0
@@ -125,8 +147,16 @@ Two consequences worth knowing:
   fresh install. Existing installs keep their own copy — reset or edit in-app.
 - `app.js` — one file, no framework, no bundler. Views are functions at the bottom half.
 - `styles.css` — CSS variables at the top control the whole palette, light and dark.
-- `sw.js` — the offline cache. Bump `CACHE = "detour-v1"` to `v2` when you deploy changes,
-  or installed copies will keep serving the old files.
+- `sw.js` — the offline cache. Bump `CACHE` on every deploy or installed copies keep serving
+  the old files. `./publish.sh "what changed"` does the bump, commit and push for you.
+
+### Changing the data model
+
+Your device's `localStorage` copy is **authoritative** once it exists — editing `seed.js` only
+affects fresh installs. So any structural change has to arrive twice: in `seed.js` for new
+installs, and in `migrate()` at the top of `app.js` for the copy already on your phone.
+`migrate()` is guarded by `S.schema`, so it runs once and is safe to ship repeatedly. The WWW
+release is schema 2: it adds `tasks`, `blockRoutines` and a `sliderId` on every block.
 
 ---
 

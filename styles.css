@@ -156,7 +156,139 @@ button{font-family:inherit; color:inherit; cursor:pointer}
   color:var(--text-3); font-size:14px; line-height:1.6;
 }
 
-/* ---------- week ---------- */
+/* ---------- WWW calendar ---------- */
+.wwwbar{display:flex; align-items:center; gap:7px}
+.iconbtn.sm{width:32px; height:32px; font-size:16px; border-radius:8px}
+.seg{display:flex; border:1px solid var(--line-strong); border-radius:9px; overflow:hidden; flex:none}
+.seg button{
+  background:transparent; border:none; padding:7px 13px; color:var(--text-3);
+  font-family:var(--mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase;
+}
+.seg button[aria-pressed="true"]{background:var(--text); color:var(--bg)}
+
+.odbar{
+  display:flex; align-items:center; gap:9px; padding:10px 12px; cursor:pointer;
+  border:1px solid var(--bad); border-radius:11px; background:color-mix(in srgb, var(--bad) 8%, transparent);
+}
+.odbar .dim{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+
+/* No overflow/clip on .cal — it would become the sticky scroll container and
+   pin .calhead inside the card instead of under the app topbar. */
+.cal{
+  --gut:44px; --ppm:1.05;
+  border:1px solid var(--line); border-radius:14px; background:var(--surface);
+}
+.cal[data-mode="week"]{--gut:38px}
+
+.calhead{
+  display:grid; position:sticky; top:var(--topbarh,69px); z-index:14;
+  background:var(--surface); border-bottom:1px solid var(--line);
+  border-radius:13px 13px 0 0;
+}
+.calhead .sp, .caldue .sp{border-right:1px solid var(--line); display:grid; place-items:center; padding:4px}
+.dh{
+  background:none; border:none; border-right:1px solid var(--line); min-width:0;
+  padding:7px 2px 6px; display:flex; flex-direction:column; align-items:center; gap:1px; color:inherit;
+}
+.dh:last-child{border-right:none}
+.dh .w{font-family:var(--mono); font-size:9px; letter-spacing:.13em; text-transform:uppercase; color:var(--text-3)}
+.dh .d{font-size:16px; font-weight:600; line-height:1.15}
+.dh .n{font-family:var(--mono); font-size:9px; color:var(--text-3)}
+.dh.is-today .w, .dh.is-today .d{color:var(--accent)}
+
+.caldue{display:grid; border-bottom:1px solid var(--line); background:var(--surface-2); min-height:30px}
+.duecell{
+  padding:4px; border-right:1px solid var(--line); min-width:0;
+  display:flex; flex-direction:column; gap:3px; justify-content:center;
+}
+.duecell:last-child{border-right:none}
+.duechip{
+  display:block; width:100%; text-align:left; font-family:inherit;
+  font-size:10.5px; line-height:1.25; padding:3px 5px; border-radius:5px;
+  background:var(--bg); border:1px solid var(--line-strong); color:var(--text-2);
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.duechip.ms{border-color:var(--accent-line); color:var(--accent)}
+.duechip.count{
+  text-align:center; font-family:var(--mono); font-size:9px; letter-spacing:.08em;
+  text-transform:uppercase; border-color:var(--accent-line); color:var(--accent); background:var(--accent-soft);
+}
+.duenone{font-family:var(--mono); font-size:9px; color:var(--text-3); text-align:center}
+
+.calbody{display:grid; position:relative; border-radius:0 0 13px 13px; overflow:hidden}
+.gutter{border-right:1px solid var(--line); position:relative}
+.gutter .hr{
+  position:absolute; right:5px; transform:translateY(-50%); white-space:nowrap;
+  font-family:var(--mono); font-size:9px; color:var(--text-3);
+}
+.gutter .hr.first{transform:translateY(0)}
+.calcol{position:relative; border-right:1px solid var(--line); min-width:0; overflow:hidden}
+.calcol:last-child{border-right:none}
+.calcol.is-today{background:color-mix(in srgb, var(--accent) 4%, transparent)}
+.hl{position:absolute; left:0; right:0; height:0; border-top:1px solid var(--line)}
+.hl.half{border-top-style:dotted; opacity:.6}
+.nowline{position:absolute; left:0; right:0; height:0; border-top:2px solid var(--bad); z-index:8; pointer-events:none}
+.nowline::before{content:""; position:absolute; left:0; top:-4px; width:7px; height:7px; border-radius:50%; background:var(--bad)}
+.calempty{
+  position:absolute; inset:14% 10% auto; text-align:center; color:var(--text-3);
+  font-size:13px; line-height:1.6; pointer-events:none;
+}
+
+.cev{
+  position:absolute; z-index:4; overflow:hidden; text-align:left;
+  border-radius:7px; padding:5px 7px; display:flex; flex-direction:column; gap:2px; cursor:pointer;
+  background:var(--surface-2); border:1px solid var(--line); border-left:3px solid var(--line-strong);
+}
+.cev .cl{font-size:12.5px; font-weight:600; line-height:1.2; overflow:hidden}
+.cev .ct{font-family:var(--mono); font-size:9px; color:var(--text-3)}
+.cev .cs{
+  align-self:flex-start; background:none; border:none; padding:2px 0 0; margin:0;
+  font-family:inherit; font-size:10.5px; line-height:1.15; color:var(--accent);
+  text-decoration:underline; text-underline-offset:2px; text-align:left; max-width:100%;
+  overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.cev.tiny{padding:2px 6px; justify-content:center}
+.cev.tiny .cl{white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+.cev.tiny .ct, .cev.tiny .cs{display:none}
+.cev.live{box-shadow:0 0 0 1.5px var(--accent-line) inset}
+.cev.done{opacity:.42}
+.cev.done .cl{text-decoration:line-through}
+.cal[data-mode="week"] .cev{padding:3px 4px; border-radius:5px; border-left-width:2.5px}
+.cal[data-mode="week"] .cev .cl{font-size:9.5px; line-height:1.15}
+.cal[data-mode="week"] .cev .cs{font-size:8.5px}
+
+.sliderbtn{
+  display:flex; align-items:center; gap:8px; width:100%; margin-top:10px;
+  background:var(--bg); border:1px solid var(--accent-line); border-radius:10px;
+  padding:11px 12px; font-family:inherit; font-size:14.5px; font-weight:600; color:var(--accent);
+}
+.sliderbtn .dim{margin-left:auto}
+
+.tk{
+  display:flex; gap:11px; align-items:flex-start; padding:11px 12px;
+  background:var(--surface); border:1px solid var(--line); border-radius:11px;
+}
+.tk .b{flex:1; min-width:0; display:flex; flex-direction:column; gap:5px}
+.tk .t{font-size:14.5px; line-height:1.35}
+.tk .meta{display:flex; gap:6px; flex-wrap:wrap; align-items:center}
+.tk.done{opacity:.5}
+.tk.done .t{text-decoration:line-through}
+
+.addtask{display:grid; grid-template-columns:1fr auto; gap:8px}
+.addtask input[type=date]{grid-column:1}
+.addtask .btn{grid-column:2; grid-row:1 / span 2}
+
+.pv{
+  border:1px solid var(--line); border-radius:12px; background:var(--surface);
+  padding:12px; display:flex; flex-direction:column; gap:9px;
+}
+.pv[data-kind="skip"]{opacity:.45}
+.pv .pvraw{font-family:var(--display); font-style:italic; font-size:13.5px; color:var(--text-3); line-height:1.4}
+.pv .pvrow{display:flex; gap:8px}
+.pv .pvrow > label{flex:1; min-width:0}
+.pv .kindrow select{font-family:var(--mono); font-size:11px; letter-spacing:.06em; text-transform:uppercase}
+
+/* ---------- week (legacy day columns, still used by Today) ---------- */
 .wknav{display:flex; align-items:center; justify-content:space-between; gap:8px}
 .daycol{display:flex; flex-direction:column; gap:8px}
 .dayhead{

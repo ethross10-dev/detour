@@ -1,4 +1,100 @@
 window.DETOUR_SEED = {
+ "tasks": [
+ {
+  "id": "k01",
+  "sliderId": "e170bea8eb",
+  "projectId": "professional",
+  "title": "Email the current EMA Alumni Relations Director to find time to meet",
+  "due": "2026-08-26",
+  "note": "You are running for their seat. Ask what the job actually costs per week, and what they wish they'd known.",
+  "done": false,
+  "doneAt": null
+ },
+ {
+  "id": "k02",
+  "sliderId": "e170bea8eb",
+  "projectId": "professional",
+  "title": "Check the EMA board application the day it goes up",
+  "due": "2026-08-26",
+  "note": "Director of Alumni Relations, year one.",
+  "done": false,
+  "doneAt": null
+ },
+ {
+  "id": "k03",
+  "sliderId": "e170bea8eb",
+  "projectId": "professional",
+  "title": "Meet with the current Alumni Relations Director",
+  "due": "2026-09-04",
+  "note": "",
+  "done": false,
+  "doneAt": null
+ },
+ {
+  "id": "k04",
+  "sliderId": "e170bea8eb",
+  "projectId": "professional",
+  "title": "Submit the EMA Director of Alumni Relations application",
+  "due": "2026-09-02",
+  "note": "",
+  "done": false,
+  "doneAt": null
+ },
+ {
+  "id": "k05",
+  "sliderId": "4620f197bc",
+  "projectId": "professional",
+  "title": "Pick one center and say it out loud — Price, Easton or MEMES",
+  "due": "2026-09-30",
+  "note": "Price owns the capstone. Deep in one beats shallow in three.",
+  "done": false,
+  "doneAt": null
+ },
+ {
+  "id": "k06",
+  "sliderId": "c4ad3ee6f3",
+  "projectId": "professional",
+  "title": "Follow up on the Off Record Sound application",
+  "due": "2026-09-08",
+  "note": "Sent 25 Aug. Two weeks of silence is a nudge, not a no.",
+  "done": false,
+  "doneAt": null
+ },
+ {
+  "id": "k07",
+  "sliderId": "98fe52e687",
+  "projectId": "music",
+  "title": "Tell someone the October date for TGNS and SWAGBOYS",
+  "due": "2026-08-31",
+  "note": "A release date only exists once another person is expecting it.",
+  "done": false,
+  "doneAt": null
+ }
+],
+ "blockRoutines": {
+ "4620f197bc": [
+  {
+   "id": "s1",
+   "text": "Finish whatever is due next — homework first, nothing else"
+  },
+  {
+   "id": "s2",
+   "text": "Read Slack — Anderson, section, club channels"
+  },
+  {
+   "id": "s3",
+   "text": "Clear email to zero"
+  },
+  {
+   "id": "s4",
+   "text": "Check professor announcements on BruinLearn"
+  },
+  {
+   "id": "s5",
+   "text": "Put anything new straight onto WWW, then stop"
+  }
+ ]
+},
  "projects": [
   {
    "id": "professional",
@@ -921,142 +1017,157 @@ window.DETOUR_SEED = {
  ],
  "stop": "Auditing. Every one of the twenty overdue milestones in your Memento is an audit, a definition, a confirmation or a document — and this workshop was the last one you needed. The next thing you produce should be visible to somebody else.",
  "blockTemplates": [
-  {
-   "id": "t01",
-   "day": 1,
-   "label": "Anderson Block",
-   "start": "08:00",
-   "mins": 90,
-   "projectId": "professional",
-   "kind": "anderson"
-  },
-  {
-   "id": "t02",
-   "day": 2,
-   "label": "Anderson Block",
-   "start": "08:00",
-   "mins": 90,
-   "projectId": "professional",
-   "kind": "anderson"
-  },
-  {
-   "id": "t03",
-   "day": 3,
-   "label": "Anderson Block",
-   "start": "08:00",
-   "mins": 90,
-   "projectId": "professional",
-   "kind": "anderson"
-  },
-  {
-   "id": "t04",
-   "day": 4,
-   "label": "Anderson Block",
-   "start": "08:00",
-   "mins": 90,
-   "projectId": "professional",
-   "kind": "anderson"
-  },
-  {
-   "id": "t05",
-   "day": 5,
-   "label": "Anderson Block",
-   "start": "08:00",
-   "mins": 90,
-   "projectId": "professional",
-   "kind": "anderson"
-  },
-  {
-   "id": "t06",
-   "day": 2,
-   "label": "Workout",
-   "start": "07:00",
-   "mins": 60,
-   "projectId": "wellness",
-   "kind": "workout"
-  },
-  {
-   "id": "t07",
-   "day": 4,
-   "label": "Workout",
-   "start": "07:00",
-   "mins": 60,
-   "projectId": "wellness",
-   "kind": "workout"
-  },
-  {
-   "id": "t08",
-   "day": 6,
-   "label": "Run club",
-   "start": "09:00",
-   "mins": 75,
-   "projectId": "wellness",
-   "kind": "workout"
-  },
-  {
-   "id": "t09",
-   "day": 1,
-   "label": "Archive R&D",
-   "start": "19:30",
-   "mins": 90,
-   "projectId": "archive",
-   "kind": "project"
-  },
-  {
-   "id": "t10",
-   "day": 2,
-   "label": "StudioVault",
-   "start": "19:00",
-   "mins": 120,
-   "projectId": "studiovault",
-   "kind": "project"
-  },
-  {
-   "id": "t11",
-   "day": 3,
-   "label": "Music Production",
-   "start": "19:00",
-   "mins": 120,
-   "projectId": "music",
-   "kind": "project"
-  },
-  {
-   "id": "t12",
-   "day": 4,
-   "label": "StudioVault",
-   "start": "19:00",
-   "mins": 120,
-   "projectId": "studiovault",
-   "kind": "project"
-  },
-  {
-   "id": "t13",
-   "day": 6,
-   "label": "Music Production",
-   "start": "10:30",
-   "mins": 180,
-   "projectId": "music",
-   "kind": "project"
-  },
-  {
-   "id": "t14",
-   "day": 0,
-   "label": "Sunday plan",
-   "start": "17:00",
-   "mins": 30,
-   "projectId": null,
-   "kind": "ritual"
-  },
-  {
-   "id": "t15",
-   "day": 0,
-   "label": "Weekly routines",
-   "start": "15:00",
-   "mins": 60,
-   "projectId": "wellness",
-   "kind": "admin"
-  }
- ],
+ {
+  "id": "t01",
+  "day": 1,
+  "label": "Anderson Block",
+  "start": "08:00",
+  "mins": 90,
+  "projectId": "professional",
+  "kind": "anderson",
+  "sliderId": "4620f197bc"
+ },
+ {
+  "id": "t02",
+  "day": 2,
+  "label": "Anderson Block",
+  "start": "08:00",
+  "mins": 90,
+  "projectId": "professional",
+  "kind": "anderson",
+  "sliderId": "4620f197bc"
+ },
+ {
+  "id": "t03",
+  "day": 3,
+  "label": "Anderson Block",
+  "start": "08:00",
+  "mins": 90,
+  "projectId": "professional",
+  "kind": "anderson",
+  "sliderId": "4620f197bc"
+ },
+ {
+  "id": "t04",
+  "day": 4,
+  "label": "Anderson Block",
+  "start": "08:00",
+  "mins": 90,
+  "projectId": "professional",
+  "kind": "anderson",
+  "sliderId": "4620f197bc"
+ },
+ {
+  "id": "t05",
+  "day": 5,
+  "label": "Anderson Block",
+  "start": "08:00",
+  "mins": 90,
+  "projectId": "professional",
+  "kind": "anderson",
+  "sliderId": "4620f197bc"
+ },
+ {
+  "id": "t06",
+  "day": 2,
+  "label": "Workout",
+  "start": "07:00",
+  "mins": 60,
+  "projectId": "wellness",
+  "kind": "workout",
+  "sliderId": "310350efa2"
+ },
+ {
+  "id": "t07",
+  "day": 4,
+  "label": "Workout",
+  "start": "07:00",
+  "mins": 60,
+  "projectId": "wellness",
+  "kind": "workout",
+  "sliderId": "310350efa2"
+ },
+ {
+  "id": "t08",
+  "day": 6,
+  "label": "Run club",
+  "start": "09:00",
+  "mins": 75,
+  "projectId": "wellness",
+  "kind": "workout",
+  "sliderId": "310350efa2"
+ },
+ {
+  "id": "t09",
+  "day": 1,
+  "label": "Archive R&D",
+  "start": "19:30",
+  "mins": 90,
+  "projectId": "archive",
+  "kind": "project",
+  "sliderId": "ebdcefcb48"
+ },
+ {
+  "id": "t10",
+  "day": 2,
+  "label": "StudioVault",
+  "start": "19:00",
+  "mins": 120,
+  "projectId": "studiovault",
+  "kind": "project",
+  "sliderId": "d179a7ccd2"
+ },
+ {
+  "id": "t11",
+  "day": 3,
+  "label": "Music Production",
+  "start": "19:00",
+  "mins": 120,
+  "projectId": "music",
+  "kind": "project",
+  "sliderId": "98fe52e687"
+ },
+ {
+  "id": "t12",
+  "day": 4,
+  "label": "StudioVault",
+  "start": "19:00",
+  "mins": 120,
+  "projectId": "studiovault",
+  "kind": "project",
+  "sliderId": "d179a7ccd2"
+ },
+ {
+  "id": "t13",
+  "day": 6,
+  "label": "Music Production",
+  "start": "10:30",
+  "mins": 180,
+  "projectId": "music",
+  "kind": "project",
+  "sliderId": "98fe52e687"
+ },
+ {
+  "id": "t14",
+  "day": 0,
+  "label": "Sunday plan",
+  "start": "17:00",
+  "mins": 30,
+  "projectId": null,
+  "kind": "ritual",
+  "sliderId": null
+ },
+ {
+  "id": "t15",
+  "day": 0,
+  "label": "Weekly routines",
+  "start": "15:00",
+  "mins": 60,
+  "projectId": "wellness",
+  "kind": "admin",
+  "sliderId": "408540ebe2"
+ }
+],
  "routines": [
   {
    "id": "r01",
