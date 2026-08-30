@@ -156,6 +156,49 @@ button{font-family:inherit; color:inherit; cursor:pointer}
   color:var(--text-3); font-size:14px; line-height:1.6;
 }
 
+/* ---------- tab colours, from Ethan's sketch ---------- */
+#tabs .tab[data-view="www"][aria-selected="true"]{color:#C9922B}
+#tabs .tab[data-view="plan"][aria-selected="true"]{color:#4F9E3C}
+#tabs .tab[data-view="reflect"][aria-selected="true"]{color:#3D82C4}
+#tabs .tab[data-view="audit"][aria-selected="true"]{color:#B5563F}
+#tabs .tab[data-view="progress"][aria-selected="true"]{color:#C43D8E}
+:root[data-theme="dark"] #tabs .tab[data-view="www"][aria-selected="true"]{color:#E0AE4C}
+:root[data-theme="dark"] #tabs .tab[data-view="plan"][aria-selected="true"]{color:#7BD063}
+:root[data-theme="dark"] #tabs .tab[data-view="reflect"][aria-selected="true"]{color:#6FAEE8}
+:root[data-theme="dark"] #tabs .tab[data-view="audit"][aria-selected="true"]{color:#E0806C}
+:root[data-theme="dark"] #tabs .tab[data-view="progress"][aria-selected="true"]{color:#EE73BC}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]) #tabs .tab[data-view="www"][aria-selected="true"]{color:#E0AE4C}
+  :root:not([data-theme="light"]) #tabs .tab[data-view="plan"][aria-selected="true"]{color:#7BD063}
+  :root:not([data-theme="light"]) #tabs .tab[data-view="reflect"][aria-selected="true"]{color:#6FAEE8}
+  :root:not([data-theme="light"]) #tabs .tab[data-view="audit"][aria-selected="true"]{color:#E0806C}
+  :root:not([data-theme="light"]) #tabs .tab[data-view="progress"][aria-selected="true"]{color:#EE73BC}
+}
+
+/* ---------- suggestions, check-ins, audit ---------- */
+.sugg{
+  border:1px solid var(--line); border-left:3px solid var(--accent-line);
+  border-radius:12px; background:var(--surface); padding:13px 14px;
+  display:flex; flex-direction:column; gap:7px;
+}
+.sugg .row{flex-wrap:wrap}
+.checkin{
+  background:var(--surface); border:1px solid var(--line); border-radius:12px;
+  padding:12px 13px; display:flex; flex-direction:column; gap:9px;
+}
+.checkin .n{font-size:14.5px; font-weight:600; line-height:1.3}
+.auditpre{
+  margin:0; padding:12px; border-radius:10px; background:var(--bg);
+  border:1px solid var(--line); max-height:320px; overflow:auto;
+  font-family:var(--mono); font-size:11px; line-height:1.55; color:var(--text-2);
+  white-space:pre; -webkit-overflow-scrolling:touch;
+}
+.hr-soft{height:1px; background:var(--line); margin:4px 0}
+.snum{
+  font-family:var(--mono); font-size:10px; color:var(--accent); flex:none;
+  border:1px solid var(--accent-line); border-radius:6px; padding:2px 7px;
+}
+
 /* ---------- WWW calendar ---------- */
 .wwwbar{display:flex; align-items:center; gap:7px}
 .iconbtn.sm{width:32px; height:32px; font-size:16px; border-radius:8px}
@@ -358,7 +401,7 @@ label.fld > span{font-family:var(--mono); font-size:9px; letter-spacing:.15em; t
 .ms.done{opacity:.5}
 .ms.done .ttl{text-decoration:line-through}
 .ms .why{font-size:13px; color:var(--text-3); line-height:1.5}
-.pdot{width:8px; height:8px; border-radius:50%; flex:none}
+.pdot{display:inline-block; width:8px; height:8px; border-radius:50%; flex:none; vertical-align:middle}
 
 .projcard{border:1px solid var(--line); border-radius:14px; overflow:hidden; background:var(--surface)}
 .projcard .ph{display:flex; align-items:center; gap:10px; padding:14px 15px}

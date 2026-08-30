@@ -73,55 +73,57 @@ If you later decide you want it native, the same folder wraps unchanged in Capac
 
 ## What's in it
 
-**Today** — the current or next block, what to work on inside it (pulled from the next open
-milestone for that project), today's routines, and anything due in the next 30 days. When
-every block is ticked it tells you to close the laptop, which is the actual point.
+Five tabs.
 
-**WWW** — *Working While Working.* The calendar, and the reason the app exists. An Outlook-shaped
-day and week grid: hour gutter, half-hour lines, a red now-line, overlapping blocks packed
-side by side. Every block carries a **project** and a **slider**, and the slider name on the
-block is a link — tap it and you get that slider's **task list**: checkboxes, due dates, add
-a new one inline. Above the grid, a **Due** strip shows the tasks and milestones landing on
-each date. Tapping the block itself opens **the routine** (a repeating checklist that is the
-same every time that block runs, ticked fresh per instance — the Anderson Block ships with
-homework / Slack / email / announcements) plus that slider's open tasks. Week mode shows
-total hours blocked with a warning about what is realistically keepable in a heavy quarter.
+**WWW** — *Working While Working.* The calendar, and the reason the app exists. Outlook-shaped
+day and week grid: hour gutter, half-hour lines, a red now-line, overlapping blocks packed side
+by side. Every block carries a **project** and a **slider**, and the slider name on the block is
+a link into that slider's **task list**. Tapping the block opens **the routine** — a repeating
+checklist, same every instance, ticked fresh each time. On today's date it opens with what is
+running right now, and tells you to close the laptop when the day is clear.
 
-**The assistant** — `+` in the header, or the button under the calendar. Type it the way you'd
-say it, one thing per line:
+**Plan** — three things in one place. **Suggested blocks**, generated from dates that already
+exist: anything inside the 3-2-1 window, anything due within a fortnight with no block against
+it, any task coming due whose slider is unbooked. Each is a button you press — nothing moves on
+its own. Then the **Sunday ritual** in five steps. Then the **end-of-day check-in**: for each
+block that has finished, did you make the progress you wanted, and if not, book another run at
+it.
 
-```
-Anderson productivity block tonight, 1 hour
-Email the EMA alumni director to find time to meet, due Wednesday
-StudioVault every Tuesday 7pm for 2 hours
-studio session with ttbby saturday 10:30am-1pm
-```
+**Reflect** — type it or dictate it (the browser's own speech recognition, no key). Below that,
+**what the app noticed**: a recurring block skipped three of the last four times it had your
+attention, a milestone overdue by more than a week, a week where you kept under half your
+blocks, a project with something due and nothing on the calendar. Each carries the change it
+would make; you approve or dismiss. It stays quiet until it has evidence — a day you never
+opened the app is not a day you failed.
 
-It sorts each line into a **block**, a **task**, a **recurring block**, a **milestone** or a
-**note**, parses the date, time and duration, and guesses the slider from your own vocabulary
-(EMA, Otherside, ttbby, Juno, Frank Ocean, Logic, BCC…). Then it shows you every guess in an
-editable card before anything is written. It runs entirely on the device — no API key, no
-network, works on the subway. It *will* be wrong sometimes; the preview is the point.
+**Audit** — quarterly, at each Memento. The app assembles the brief from what actually
+happened: milestones done and overdue by project, block completion over twelve weeks, recent
+Sunday entries, reflections since last quarter, and five questions worth being asked. Copy it
+into Claude and let the conversation do the auditing.
 
-**Plan** — the Sunday ritual, in five steps: look back one week, pick workouts, pick meals,
-place blocks, name the one thing that matters. It reads back your completion rate from last
-week and tells you to schedule *less* if you missed most of it.
+**Progress** — the Sunday survey. Weeks to graduation, what you got done per project, top five
+goals for next week, cool stuff from last week. **Pull in what the app already knows** fills
+the boxes from milestones, tasks and blocks you actually ticked that week, so you start from
+evidence instead of a blank page. Past weeks are kept. The full milestone list lives below it.
 
-**Goals** — the five 90-day objectives, then all 53 milestones grouped by window, filterable
-by project, overdue, or build tasks. Tap any milestone for why it matters and to change its
-target date. Project cards hold the purpose, graduation mindset and every slider definition.
+**Header** — `+` opens the plain-English assistant. `☰` has routines, the weekly template
+editor, all open tasks, notes, sync, theme and export/import.
 
-**Routines** — daily, weekly, monthly and twice-yearly, with automatic period resets and
-streaks on the daily ones. This is where the Memento's 23 Routines checklist items went.
+### The 3-2-1 rule
 
-**Header** — `+` opens the assistant. `☰` has the weekly template editor, all open tasks,
-your captured notes, Memento dates, theme, and **Export / Import**.
+Your own timeline policy, made mechanical. Anything with a due date is checked against it:
+three days out it should be **started**, two days out **in progress**, one day out
+**completed**. Plan surfaces whatever is off-pace.
 
 ### Deliberately not in v0
 
 Notifications, calendar sync, the Logic scanner feed, the artist/media database, the finance
-review, and anything to do with StudioVault's archive. Those are v1–v3 in the field plan.
-Adding them now is the failure mode the whole audit was about.
+review, and anything to do with StudioVault's archive.
+
+Also not here, and worth being clear about: **Reflect cannot read the Voice Memos app.** iOS
+gives web apps no access to it. Dictation inside Detour is the substitute. And nothing in Plan,
+Reflect or Audit calls a language model — every suggestion is a rule over your own data, which
+is why it works on the subway and costs nothing.
 
 ---
 

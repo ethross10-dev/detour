@@ -10,10 +10,14 @@ function freshState() {
   var seed = window.DETOUR_SEED;
   return {
     version: 1,
-    schema: 2,
+    schema: 3,
     createdAt: new Date().toISOString(),
     theme: "auto",
     wwwMode: "day",
+    progress: [],      /* one Sunday entry per week */
+    reflections: [],   /* Reflect tab entries */
+    checkins: {},      /* dateKey -> { blockKey: "yes"|"partly"|"no" } */
+    dismissed: {},     /* suggestion key -> when you waved it away */
     stamps: {},        /* record key -> last edit time, for sync merging */
     tombs: {},         /* record key -> deletion time */
     clock: 0,          /* logical clock, so device skew can't reorder edits */
@@ -82,12 +86,49 @@ function migrate() {
     save();
   }
 
+  /* 2 → 3 : the Professional Project rewrite, and the five-tab shape.
+     Ethan replaced all twelve Professional milestones with his own eleven.
+     Dated sub-work from the retired ones survives as tasks so no real
+     deadline is lost — the September Hillel budget above all. */
+  if (S.schema < 3) {
+    var newPro = clone((seed.milestones || []).filter(function (m) { return m.projectId === "professional"; }));
+    S.milestones = (S.milestones || []).filter(function (m) { return m.projectId !== "professional"; }).concat(newPro);
+
+    (seed.tasks || []).forEach(function (t) {
+      if (!S.tasks.some(function (x) { return x.id === t.id; })) S.tasks.push(clone(t));
+    });
+
+    /* Anderson blocks move to after class; one is added at the weekend.
+       Only shift a block still sitting at the original 8am, so an edit
+       you already made is never overwritten. */
+    (S.templates || []).forEach(function (t) {
+      if (t.kind === "anderson" && t.start === "08:00") t.start = "16:30";
+      if (t.id === "t14" && t.label === "Sunday plan") { t.label = "Sunday plan + progress"; t.mins = 45; }
+    });
+    if (!S.templates.some(function (t) { return t.id === "t16"; })) {
+      S.templates.push({ id: "t16", day: 6, label: "Anderson Block", start: "13:00", mins: 90,
+                         projectId: "professional", kind: "anderson", sliderId: "4620f197bc" });
+    }
+    S.blockRoutines["4620f197bc"] = clone(seed.blockRoutines["4620f197bc"]);
+
+    if (!S.progress) S.progress = [];
+    if (!S.reflections) S.reflections = [];
+    if (!S.checkins) S.checkins = {};
+    if (!S.dismissed) S.dismissed = {};
+    S.schema = 3;
+    save();
+  }
+
   if (!S.tasks) S.tasks = [];
   if (!S.blockRoutines) S.blockRoutines = {};
   if (!S.wwwMode) S.wwwMode = "day";
   if (!S.stamps) S.stamps = {};
   if (!S.tombs) S.tombs = {};
   if (!S.clock) S.clock = 0;
+  if (!S.progress) S.progress = [];
+  if (!S.reflections) S.reflections = [];
+  if (!S.checkins) S.checkins = {};
+  if (!S.dismissed) S.dismissed = {};
 }
 var saveTimer = null;
 function save() {
@@ -277,6 +318,23 @@ function routinesDueToday() {
 }
 
 /* ============================ milestones ============================ */
+/* ============================ the 3-2-1 rule ============================
+   Ethan's own timeline policy, made mechanical:
+     3 days out — started (over the previous weekend)
+     2 days out — in progress
+     1 day out  — completed
+   Anything with a due date gets checked against it. */
+function timeline(due) {
+  if (!due) return null;
+  var n = daysBetween(dkey(today()), due);
+  if (n < 0)  return { k: "late",     n: n, want: "Should already be done", cls: "bad" };
+  if (n === 0) return { k: "due",     n: n, want: "Due today",              cls: "bad" };
+  if (n === 1) return { k: "complete",n: n, want: "Finish it today",        cls: "bad" };
+  if (n === 2) return { k: "progress",n: n, want: "Should be in progress",  cls: "warn" };
+  if (n === 3) return { k: "start",   n: n, want: "Should be started",      cls: "warn" };
+  return null;
+}
+
 function milestoneStatus(m) {
   if (m.done) return { cls: "good", label: "done" };
   if (!m.due) return { cls: "", label: "ongoing" };
@@ -327,7 +385,7 @@ function closeSheet() { sheetEl.hidden = true; document.body.style.overflow = ""
 Array.prototype.forEach.call(sheetEl.querySelectorAll("[data-close]"), function (b) { on(b, "click", closeSheet); });
 
 /* ============================ views ============================ */
-var view = "today";
+var view = "www";
 var weekCursor = weekStartOf(today());
 var wwwCursor = today();
 var goalFilter = "all";
@@ -338,7 +396,8 @@ function render() {
   Array.prototype.forEach.call(document.querySelectorAll("#tabs .tab"), function (t) {
     t.setAttribute("aria-selected", t.dataset.view === view ? "true" : "false");
   });
-  ({ today: viewToday, www: viewWWW, sunday: viewSunday, goals: viewGoals, routines: viewRoutines }[view])(el);
+  ({ www: viewWWW, plan: viewPlan, reflect: viewReflect, audit: viewAudit,
+     progress: viewProgress, routines: viewRoutines }[view] || viewWWW)(el);
   syncTopbarH();
   el.scrollTop = 0;
   window.scrollTo(0, 0);
@@ -351,17 +410,15 @@ function syncTopbarH() {
   if (tb) document.documentElement.style.setProperty("--topbarh", tb.offsetHeight + "px");
 }
 
-/* ---------------- TODAY ---------------- */
-function viewToday(root) {
-  var d = today(), k = dkey(d);
+/* ---------------- the "right now" hero, shown at the top of WWW ----------------
+   The old Today tab collapsed into this. It is the one piece of the app that
+   tells you to stop, so it survives the tab rewrite. */
+function nowHero(d) {
+  var k = dkey(d);
   var blocks = blocksFor(d);
   var doneCount = blocks.filter(function (b) { return blockState(k, b.key).done; }).length;
   var nm = nowMins();
 
-  var wrap = h("div", "stack g20");
-  document.getElementById("tbsub").textContent = fmtLong(d);
-
-  /* hero: current or next block, else done-state */
   var live = null, next = null;
   blocks.forEach(function (b) {
     var s = hmToMins(b.start), e = s + b.mins;
@@ -395,53 +452,25 @@ function viewToday(root) {
     hero.appendChild(h("div", "big", "No blocks today."));
     hero.appendChild(h("div", "sub", "Either that's deliberate, or the week never got planned."));
     var pl = h("button", "btn"); pl.textContent = "Plan the week";
-    on(pl, "click", function () { view = "sunday"; render(); });
+    on(pl, "click", function () { view = "plan"; render(); });
     hero.appendChild(pl);
   } else {
     hero.appendChild(h("div", "lab", "Later today"));
     hero.appendChild(h("div", "big", "Nothing running right now."));
     hero.appendChild(h("div", "sub", doneCount + " of " + blocks.length + " blocks done."));
   }
-  wrap.appendChild(hero);
+  return hero;
+}
 
-  if (blocks.length) {
-    var pb = h("div", "progressbar", '<i style="width:' + (doneCount / blocks.length * 100) + '%"></i>');
-    wrap.appendChild(pb);
-  }
-
-  /* blocks */
-  var bs = h("div", "sec");
-  bs.appendChild(sechead("Today's blocks", doneCount + "/" + blocks.length));
-  if (!blocks.length) bs.appendChild(h("div", "empty", "No blocks scheduled.<br>Add one, or plan the week from the Plan tab."));
-  blocks.forEach(function (b) { bs.appendChild(blockRow(b, d)); });
-  var add = h("button", "btn ghost wide"); add.textContent = "+ Add block today";
-  on(add, "click", function () { editBlock(null, d); });
-  bs.appendChild(add);
-  wrap.appendChild(bs);
-
-  /* routines */
+/* today's routines, as a section — also lifted out of the old Today tab */
+function routinesSection() {
   var rl = routinesDueToday();
-  if (rl.length) {
-    var rs = h("div", "sec");
-    var rdone = rl.filter(function (r) { return routineDone(r); }).length;
-    rs.appendChild(sechead("Routines", rdone + "/" + rl.length));
-    rl.forEach(function (r) { rs.appendChild(routineRow(r)); });
-    wrap.appendChild(rs);
-  }
-
-  /* horizon */
-  var soon = S.milestones.filter(function (m) {
-    if (m.done || !m.due) return false;
-    var n = daysBetween(k, m.due);
-    return n <= 30;
-  }).sort(function (a, b) { return a.due < b.due ? -1 : 1; });
-  var hs = h("div", "sec");
-  hs.appendChild(sechead("Next 30 days", soon.length + " milestone" + (soon.length === 1 ? "" : "s")));
-  if (!soon.length) hs.appendChild(h("div", "empty", "Nothing due in the next month. That is allowed."));
-  soon.slice(0, 8).forEach(function (m) { hs.appendChild(milestoneRow(m)); });
-  wrap.appendChild(hs);
-
-  root.appendChild(wrap);
+  if (!rl.length) return null;
+  var rs = h("div", "sec");
+  var rdone = rl.filter(function (r) { return routineDone(r); }).length;
+  rs.appendChild(sechead("Routines", rdone + "/" + rl.length));
+  rl.forEach(function (r) { rs.appendChild(routineRow(r)); });
+  return rs;
 }
 
 function blockRow(b, date) {
@@ -598,6 +627,9 @@ function viewWWW(root) {
   bar.appendChild(prev); bar.appendChild(nowb); bar.appendChild(next);
   wrap.appendChild(bar);
 
+  /* --- what's running right now, on today's day view only --- */
+  if (!isWeek && sameDay(wwwCursor, today())) wrap.appendChild(nowHero(wwwCursor));
+
   /* --- overdue banner: tasks with a date that has passed --- */
   var od = overdueTasks();
   if (od.length) {
@@ -636,6 +668,12 @@ function viewWWW(root) {
   ai.textContent = "Type it in plain English";
   on(ai, "click", openAssistant);
   wrap.appendChild(ai);
+
+  /* --- today's routines, under the calendar --- */
+  if (!isWeek && sameDay(wwwCursor, today())) {
+    var rs = routinesSection();
+    if (rs) wrap.appendChild(rs);
+  }
 
   root.appendChild(wrap);
 }
@@ -1160,9 +1198,90 @@ function editBlock(b, date) {
   });
 }
 
-/* ---------------- SUNDAY PLAN ---------------- */
-function viewSunday(root) {
-  document.getElementById("tbsub").textContent = "Sunday plan";
+/* ============================ suggestions ============================
+   No model, no key. Blocks are proposed from dates that already exist:
+   the 3-2-1 rule, an unscheduled project with something due, and a slider
+   whose task list is stacking up. Every one is a button you press, never
+   something the app does behind your back. */
+function suggestions() {
+  var out = [], k = dkey(today());
+
+  function already(sliderId, byDate) {
+    for (var i = 0; i <= 14; i++) {
+      var d = addDays(today(), i);
+      if (byDate && dkey(d) > byDate) break;
+      var hit = blocksFor(d).some(function (b) { return b.sliderId === sliderId; });
+      if (hit) return true;
+    }
+    return false;
+  }
+
+  /* milestones inside the 3-2-1 window, or due within a fortnight */
+  S.milestones.filter(function (m) { return !m.done && m.due; }).forEach(function (m) {
+    var n = daysBetween(k, m.due);
+    if (n < 0 || n > 14) return;
+    var sl = S.sliders.filter(function (s) { return s.name === m.slider; })[0];
+    var key = "ms:" + m.id;
+    if (S.dismissed[key]) return;
+    var tl = timeline(m.due);
+    if (!tl && already(sl && sl.id, m.due)) return;
+    out.push({
+      key: key, urgency: n,
+      head: n === 0 ? "Due today" : "Milestone due in " + n + " day" + (n === 1 ? "" : "s"),
+      title: m.title,
+      note: tl ? tl.want + " — your own 3-2-1 rule." : "Nothing is blocked for it yet.",
+      cls: tl ? tl.cls : "",
+      sliderId: sl ? sl.id : null,
+      projectId: m.projectId,
+      by: m.due
+    });
+  });
+
+  /* tasks coming due with no block for their slider */
+  S.tasks.filter(function (t) { return !t.done && t.due; }).forEach(function (t) {
+    var n = daysBetween(k, t.due);
+    if (n < 0 || n > 7) return;
+    var key = "task:" + t.id;
+    if (S.dismissed[key]) return;
+    if (already(t.sliderId, t.due)) return;
+    out.push({
+      key: key, urgency: n + 0.5,
+      head: n === 0 ? "Task due today" : "Task due in " + n + " day" + (n === 1 ? "" : "s"),
+      title: t.title,
+      note: "No block for " + (t.sliderId ? sliderShort(t.sliderId) : "it") + " before then.",
+      cls: n <= 1 ? "bad" : "warn",
+      sliderId: t.sliderId, projectId: t.projectId, by: t.due
+    });
+  });
+
+  out.sort(function (a, b) { return a.urgency - b.urgency; });
+  return out;
+}
+
+/* put a block on the first day that still has room, before the deadline */
+function proposeBlock(s) {
+  var target = null;
+  for (var i = 0; i <= 14; i++) {
+    var d = addDays(today(), i);
+    if (s.by && dkey(d) > s.by) break;
+    var load = blocksFor(d).reduce(function (a, b) { return a + b.mins; }, 0);
+    if (load <= 240) { target = d; break; }        /* under four hours already blocked */
+  }
+  if (!target) target = today();
+  var k = dkey(target);
+  if (!S.extras[k]) S.extras[k] = [];
+  var used = blocksFor(target).map(function (b) { return hmToMins(b.start); });
+  var start = 19 * 60;
+  while (used.indexOf(start) >= 0 && start < 22 * 60) start += 60;
+  S.extras[k].push({ key: uid(), projectId: s.projectId, sliderId: s.sliderId,
+                     label: s.title.slice(0, 40), start: minsToHM(start), mins: 90, kind: "project" });
+  save();
+  return target;
+}
+
+/* ---------------- PLAN ---------------- */
+function viewPlan(root) {
+  document.getElementById("tbsub").textContent = "Plan";
   var wk = weekStartOf(today());
   var upcoming = sameDay(today(), wk) || today().getDay() >= 5 ? addDays(wk, today().getDay() >= 5 ? 7 : 0) : wk;
   var wkKey = dkey(upcoming);
@@ -1175,6 +1294,74 @@ function viewSunday(root) {
   head.appendChild(h("div", "h-lg", "Plan the week of<br>" + fmtDate(upcoming)));
   head.appendChild(h("div", "muted", "Workouts, meals and blocks in one sitting. This is the ritual the whole plan rests on — every project you audited named the same bottleneck, and it was this."));
   wrap.appendChild(head);
+
+  /* --- suggested blocks, from dates that already exist --- */
+  var sg = suggestions();
+  var ss = h("div", "sec");
+  ss.appendChild(sechead("Suggested blocks", sg.length ? sg.length + " to look at" : "nothing pressing"));
+  if (!sg.length) {
+    ss.appendChild(h("div", "empty", "Nothing due inside two weeks that isn't already blocked.<br>That is the system working, not a bug."));
+  }
+  sg.slice(0, 6).forEach(function (s) {
+    var c = h("div", "sugg");
+    var top = h("div", "row");
+    top.appendChild(h("span", "pill " + (s.cls || ""), s.head));
+    if (s.sliderId) top.appendChild(h("span", "dim", esc(sliderShort(s.sliderId))));
+    c.appendChild(top);
+    c.appendChild(h("div", "h-md", esc(s.title)));
+    c.appendChild(h("div", "dim", esc(s.note)));
+    var acts = h("div", "row");
+    var add = h("button", "btn sm"); add.textContent = "Block it";
+    on(add, "click", function () {
+      var when = proposeBlock(s);
+      toast("Blocked " + fmtDate(when));
+      wwwCursor = when; S.wwwMode = "day"; save(); view = "www"; render();
+    });
+    var no = h("button", "btn ghost sm"); no.textContent = "Not now";
+    on(no, "click", function () { S.dismissed[s.key] = Date.now(); save(); render(); });
+    acts.appendChild(add); acts.appendChild(no);
+    c.appendChild(acts);
+    ss.appendChild(c);
+  });
+  wrap.appendChild(ss);
+
+  /* --- end-of-day check-in --- */
+  var td = today(), tk = dkey(td);
+  var todays = blocksFor(td).filter(function (b) { return hmToMins(b.start) + b.mins <= nowMins(); });
+  if (todays.length) {
+    var ci = h("div", "sec");
+    var answered = todays.filter(function (b) { return (S.checkins[tk] || {})[b.key]; }).length;
+    ci.appendChild(sechead("How did today go", answered + "/" + todays.length));
+    ci.appendChild(h("div", "dim", "Optional. It feeds Sunday's report and tells you when to schedule less."));
+    todays.forEach(function (b) {
+      var cur = (S.checkins[tk] || {})[b.key];
+      var row = h("div", "checkin");
+      row.appendChild(h("div", "n", esc(b.label) + (b.sliderId ? " <span class='dim'>· " + esc(sliderShort(b.sliderId)) + "</span>" : "")));
+      var opts = h("div", "row");
+      [["yes", "Yes"], ["partly", "Partly"], ["no", "No"]].forEach(function (o) {
+        var bt = h("button", "fchip"); bt.textContent = o[1];
+        bt.setAttribute("aria-pressed", cur === o[0] ? "true" : "false");
+        on(bt, "click", function () {
+          if (!S.checkins[tk]) S.checkins[tk] = {};
+          S.checkins[tk][b.key] = S.checkins[tk][b.key] === o[0] ? null : o[0];
+          save(); render();
+        });
+        opts.appendChild(bt);
+      });
+      row.appendChild(opts);
+      if (cur === "no" || cur === "partly") {
+        var again = h("button", "btn ghost sm"); again.textContent = "Book another run at it";
+        on(again, "click", function () {
+          var when = proposeBlock({ projectId: b.projectId, sliderId: b.sliderId, title: b.label, by: null });
+          toast("Added " + fmtDate(when));
+          render();
+        });
+        row.appendChild(again);
+      }
+      ci.appendChild(row);
+    });
+    wrap.appendChild(ci);
+  }
 
   /* 1 — last week */
   wrap.appendChild(step(1, "Look back one week", function (sb) {
@@ -1258,7 +1445,7 @@ function viewSunday(root) {
   on(done, "click", function () {
     plan.planned = true; plan.at = new Date().toISOString(); save();
     toast("Week planned. Now close the laptop.");
-    view = "today"; render();
+    view = "www"; render();
   });
   wrap.appendChild(done);
 
@@ -1296,9 +1483,172 @@ function toggleOpt(label, arr, onchange) {
 }
 
 /* ---------------- GOALS ---------------- */
-function viewGoals(root) {
-  document.getElementById("tbsub").textContent = "Goals to Spring 2028";
+var GRAD = "2028-05-31";
+function weeksToGrad() { return Math.max(0, Math.round(daysBetween(dkey(today()), GRAD) / 7)); }
+
+/* what the app already knows you finished in a given week — so the Sunday
+   survey starts from evidence instead of a blank page */
+function weekHarvest(weekStart) {
+  var from = weekStart.toISOString(), to = addDays(weekStart, 7).toISOString();
+  var out = {};
+  S.projects.forEach(function (p) { out[p.id] = []; });
+  S.milestones.forEach(function (m) {
+    if (m.done && m.doneAt && m.doneAt >= from && m.doneAt < to && out[m.projectId]) out[m.projectId].push("◆ " + m.title);
+  });
+  S.tasks.forEach(function (t) {
+    if (t.done && t.doneAt && t.doneAt >= from && t.doneAt < to && out[t.projectId]) out[t.projectId].push("• " + t.title);
+  });
+  for (var i = 0; i < 7; i++) {
+    var d = addDays(weekStart, i), k = dkey(d);
+    blocksFor(d).forEach(function (b) {
+      if (!blockState(k, b.key).done || !b.projectId || !out[b.projectId]) return;
+      out[b.projectId].push("▪ " + b.label + " — " + fmtDate(d));
+    });
+  }
+  return out;
+}
+
+/* ---------------- PROGRESS ---------------- */
+function viewProgress(root) {
+  document.getElementById("tbsub").textContent = "Progress";
   var wrap = h("div", "stack g20");
+
+  var ws = weekStartOf(today()), wk = dkey(ws);
+  var entry = S.progress.filter(function (e) { return e.weekKey === wk; })[0];
+  if (!entry) {
+    entry = { id: uid(), weekKey: wk, at: null, done: {}, goals: ["", "", "", "", ""], cool: "" };
+    S.progress.push(entry);
+  }
+
+  var head = h("div", "stack g6");
+  head.appendChild(h("div", "eyebrow", "Every Sunday"));
+  head.appendChild(h("div", "h-lg", weeksToGrad() + " weeks until<br>Anderson graduation"));
+  head.appendChild(h("div", "muted", "Week of " + fmtDate(ws) + ". " +
+    (entry.at ? "Filled in " + new Date(entry.at).toLocaleDateString() + "." : "Not filled in yet.")));
+  wrap.appendChild(head);
+
+  /* --- what I got done --- */
+  var wg = h("div", "sec");
+  wg.appendChild(sechead("What I got done", ""));
+  var pull = h("button", "btn ghost wide");
+  pull.textContent = "Pull in what the app already knows";
+  on(pull, "click", function () {
+    var harvest = weekHarvest(ws);
+    S.projects.forEach(function (p) {
+      var lines = harvest[p.id] || [];
+      if (!lines.length) return;
+      var cur = (entry.done[p.id] || "").trim();
+      var add = lines.filter(function (l) { return cur.indexOf(l) < 0; }).join("\n");
+      if (add) entry.done[p.id] = cur ? cur + "\n" + add : add;
+    });
+    save(); toast("Pulled in this week's ticks"); render();
+  });
+  wg.appendChild(pull);
+  S.projects.forEach(function (p) {
+    var l = h("label", "fld");
+    var sp = h("span", null);
+    var dot = h("span", "pdot"); dot.style.background = p.color; dot.style.marginRight = "6px";
+    sp.appendChild(dot); sp.appendChild(document.createTextNode(p.name));
+    l.appendChild(sp);
+    var ta = h("textarea"); ta.style.minHeight = "62px";
+    ta.value = entry.done[p.id] || "";
+    ta.placeholder = "—";
+    on(ta, "input", function () { entry.done[p.id] = ta.value; save(); });
+    l.appendChild(ta);
+    wg.appendChild(l);
+  });
+  var misc = h("label", "fld");
+  misc.appendChild(h("span", null, "Misc. Detour projects"));
+  var mta = h("textarea"); mta.style.minHeight = "62px"; mta.value = entry.done.misc || "";
+  on(mta, "input", function () { entry.done.misc = mta.value; save(); });
+  misc.appendChild(mta);
+  wg.appendChild(misc);
+  wrap.appendChild(wg);
+
+  /* --- top 5 goals --- */
+  var gs = h("div", "sec");
+  gs.appendChild(sechead("Top 5 goals for next week", ""));
+  for (var gi = 0; gi < 5; gi++) {
+    (function (i) {
+      var row = h("div", "row");
+      row.appendChild(h("span", "snum", "0" + (i + 1)));
+      var inp = h("input"); inp.type = "text"; inp.value = entry.goals[i] || "";
+      inp.placeholder = i === 0 ? "The one that matters most" : "";
+      on(inp, "input", function () { entry.goals[i] = inp.value; save(); });
+      row.appendChild(inp);
+      gs.appendChild(row);
+    })(gi);
+  }
+  wrap.appendChild(gs);
+
+  /* --- cool stuff --- */
+  var cs = h("div", "sec");
+  cs.appendChild(sechead("Cool stuff from last week", ""));
+  var cta = h("textarea"); cta.value = entry.cool || "";
+  cta.placeholder = "The part worth remembering that no milestone captures.";
+  on(cta, "input", function () { entry.cool = cta.value; save(); });
+  cs.appendChild(cta);
+  wrap.appendChild(cs);
+
+  var seal = h("button", "btn wide");
+  seal.textContent = entry.at ? "Update this week's entry" : "Save this week's entry";
+  on(seal, "click", function () {
+    entry.at = new Date().toISOString(); save();
+    toast("Logged. Now close the laptop.");
+    render();
+  });
+  wrap.appendChild(seal);
+
+  /* --- past entries --- */
+  var past = S.progress.filter(function (e) { return e.at && e.weekKey !== wk; })
+                       .sort(function (a, b) { return a.weekKey < b.weekKey ? 1 : -1; });
+  if (past.length) {
+    var ps2 = h("div", "sec");
+    ps2.appendChild(sechead("Earlier weeks", past.length + ""));
+    past.slice(0, 12).forEach(function (e) {
+      var c = h("div", "card"); c.style.cursor = "pointer";
+      c.appendChild(h("div", "h-md", "Week of " + fmtDate(parseKey(e.weekKey))));
+      var filled = Object.keys(e.done || {}).filter(function (x) { return (e.done[x] || "").trim(); }).length;
+      c.appendChild(h("div", "dim", filled + " project" + (filled === 1 ? "" : "s") + " written up · " +
+        (e.goals || []).filter(Boolean).length + " goals set"));
+      on(c, "click", function () { showProgressEntry(e); });
+      ps2.appendChild(c);
+    });
+    wrap.appendChild(ps2);
+  }
+
+  wrap.appendChild(h("div", "hr-soft"));
+
+  /* --- the milestone list, moved here from the old Goals tab --- */
+  milestoneBoard(wrap);
+  root.appendChild(wrap);
+}
+
+function showProgressEntry(e) {
+  openSheet("Week of " + fmtDate(parseKey(e.weekKey)), function (body) {
+    S.projects.forEach(function (p) {
+      var v = (e.done || {})[p.id];
+      if (!v || !v.trim()) return;
+      body.appendChild(h("div", "eyebrow", p.name));
+      body.appendChild(h("div", "muted", esc(v).replace(/\n/g, "<br>")));
+    });
+    if ((e.done || {}).misc && e.done.misc.trim()) {
+      body.appendChild(h("div", "eyebrow", "Misc"));
+      body.appendChild(h("div", "muted", esc(e.done.misc).replace(/\n/g, "<br>")));
+    }
+    var g = (e.goals || []).filter(Boolean);
+    if (g.length) {
+      body.appendChild(h("div", "eyebrow", "Goals that week"));
+      g.forEach(function (x) { body.appendChild(h("div", "muted", "· " + esc(x))); });
+    }
+    if (e.cool && e.cool.trim()) {
+      body.appendChild(h("div", "eyebrow", "Cool stuff"));
+      body.appendChild(h("div", "muted", esc(e.cool).replace(/\n/g, "<br>")));
+    }
+  });
+}
+
+function milestoneBoard(wrap) {
 
   /* 90-day */
   var n90 = h("div", "sec");
@@ -1347,6 +1697,15 @@ function viewGoals(root) {
     if (!byTerm[m.term]) { byTerm[m.term] = []; order.push(m.term); }
     byTerm[m.term].push(m);
   });
+  /* order windows by the earliest thing due in them, not by array position —
+     rewriting a project's milestones must not scramble the sections */
+  order.sort(function (a, b) {
+    function first(t) {
+      var ds = byTerm[t].map(function (m) { return m.due; }).filter(Boolean).sort();
+      return ds[0] || "9999-99-99";
+    }
+    return first(a) < first(b) ? -1 : first(a) > first(b) ? 1 : 0;
+  });
   order.forEach(function (t) {
     var sec = h("div", "sec");
     var dn = byTerm[t].filter(function (m) { return m.done; }).length;
@@ -1376,8 +1735,6 @@ function viewGoals(root) {
     ps.appendChild(card);
   });
   wrap.appendChild(ps);
-
-  root.appendChild(wrap);
 }
 
 function showProject(p) {
@@ -1400,6 +1757,327 @@ function showProject(p) {
   });
 }
 
+/* ============================ REFLECT ============================
+   Dictation uses the browser's own speech recognition where it exists
+   (Safari and Chrome both have it) — no key, no upload from us. It cannot
+   reach the Voice Memos app; iOS gives web apps no access to it. */
+var recog = null, recogOn = false;
+function speechAvailable() {
+  return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+}
+
+function viewReflect(root) {
+  document.getElementById("tbsub").textContent = "Reflect";
+  var wrap = h("div", "stack g20");
+
+  var head = h("div", "stack g6");
+  head.appendChild(h("div", "eyebrow", "Say it, then decide"));
+  head.appendChild(h("div", "h-lg", "What actually happened?"));
+  head.appendChild(h("div", "muted", "Talk or type. Then look at what the app noticed on its own and either take the change or wave it off."));
+  wrap.appendChild(head);
+
+  var ta = h("textarea"); ta.style.minHeight = "130px";
+  ta.placeholder = "The Wednesday session got cut short again…";
+  wrap.appendChild(ta);
+
+  var row = h("div", "row");
+  if (speechAvailable()) {
+    var mic = h("button", "btn ghost");
+    mic.textContent = recogOn ? "◼ Stop" : "◉ Dictate";
+    on(mic, "click", function () {
+      var Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (recogOn && recog) { recog.stop(); recogOn = false; mic.textContent = "◉ Dictate"; return; }
+      recog = new Ctor();
+      recog.continuous = true; recog.interimResults = false; recog.lang = "en-US";
+      recog.onresult = function (e) {
+        var txt = "";
+        for (var i = e.resultIndex; i < e.results.length; i++) txt += e.results[i][0].transcript;
+        ta.value = (ta.value + " " + txt).trim();
+      };
+      recog.onerror = function () { recogOn = false; mic.textContent = "◉ Dictate"; toast("Dictation stopped"); };
+      recog.onend = function () { recogOn = false; mic.textContent = "◉ Dictate"; };
+      try { recog.start(); recogOn = true; mic.textContent = "◼ Stop"; }
+      catch (e) { toast("Could not start dictation"); }
+    });
+    row.appendChild(mic);
+  }
+  var savb = h("button", "btn");
+  savb.textContent = "Save reflection";
+  on(savb, "click", function () {
+    if (!ta.value.trim()) return;
+    S.reflections.push({ id: uid(), ts: new Date().toISOString(), text: ta.value.trim() });
+    save(); toast("Saved"); render();
+  });
+  row.appendChild(savb);
+  wrap.appendChild(row);
+  if (!speechAvailable()) {
+    wrap.appendChild(h("div", "dim", "This browser has no speech recognition, so typing it is. Detour cannot read the Voice Memos app either — iOS does not let web apps near it."));
+  }
+
+  /* --- what the app noticed --- */
+  var obs = observations();
+  var os = h("div", "sec");
+  os.appendChild(sechead("What the app noticed", obs.length ? obs.length + "" : "nothing"));
+  if (!obs.length) os.appendChild(h("div", "empty", "Nothing looks off. Either the week held, or there isn't enough history yet."));
+  obs.forEach(function (o) {
+    var c = h("div", "sugg");
+    c.appendChild(h("span", "pill " + (o.cls || ""), o.tag));
+    c.appendChild(h("div", "h-md", esc(o.title)));
+    c.appendChild(h("div", "dim", esc(o.note)));
+    var acts = h("div", "row");
+    if (o.act) {
+      var yes = h("button", "btn sm"); yes.textContent = o.actLabel;
+      on(yes, "click", function () { o.act(); save(); render(); });
+      acts.appendChild(yes);
+    }
+    var no = h("button", "btn ghost sm"); no.textContent = "Dismiss";
+    on(no, "click", function () { S.dismissed[o.key] = Date.now(); save(); render(); });
+    acts.appendChild(no);
+    c.appendChild(acts);
+    os.appendChild(c);
+  });
+  wrap.appendChild(os);
+
+  /* --- history --- */
+  if (S.reflections.length) {
+    var hs = h("div", "sec");
+    hs.appendChild(sechead("Earlier", S.reflections.length + ""));
+    S.reflections.slice().reverse().slice(0, 10).forEach(function (r) {
+      var c = h("div", "card");
+      c.appendChild(h("div", "muted", esc(r.text).replace(/\n/g, "<br>")));
+      var mt = h("div", "meta"); mt.style.marginTop = "8px";
+      mt.appendChild(h("span", "dim mono", new Date(r.ts).toLocaleDateString()));
+      var del = h("button", "btn ghost sm"); del.textContent = "Delete"; del.style.marginLeft = "auto";
+      on(del, "click", function () {
+        S.reflections = S.reflections.filter(function (q) { return q.id !== r.id; });
+        save(); render();
+      });
+      mt.appendChild(del);
+      c.appendChild(mt);
+      hs.appendChild(c);
+    });
+    wrap.appendChild(hs);
+  }
+
+  root.appendChild(wrap);
+}
+
+/* Rule-based observations. Every one is a fact about your own data, with a
+   concrete action attached — never a guess dressed up as advice. */
+function observations() {
+  var out = [], k = dkey(today());
+
+  /* Did you actually have the app open that day? A day with no ticks at all
+     is a day with no evidence — counting it as a miss is how a tool starts
+     crying wolf on a fresh install. */
+  function dayHasEvidence(d) {
+    var dk2 = dkey(d);
+    if (S.createdAt && dk2 < S.createdAt.slice(0, 10)) return false;
+    if (S.blockState[dk2] && Object.keys(S.blockState[dk2]).length) return true;
+    return Object.keys(S.routineLog).some(function (k2) { return k2.split("|")[1] === dk2; });
+  }
+
+  /* a recurring block you keep missing */
+  S.templates.forEach(function (t) {
+    var missed = 0, seen = 0;
+    for (var w = 1; w <= 4; w++) {
+      var d = addDays(today(), -7 * w);
+      while (d.getDay() !== t.day) d = addDays(d, -1);
+      var dk2 = dkey(d);
+      if (!dayHasEvidence(d)) continue;
+      if (blocksFor(d).some(function (b) { return b.templateId === t.id; })) {
+        seen++;
+        if (!blockState(dk2, t.id).done) missed++;
+      }
+    }
+    if (seen >= 3 && missed >= 3) {
+      var key = "miss:" + t.id;
+      if (S.dismissed[key]) return;
+      out.push({
+        key: key, tag: "missed " + missed + "×", cls: "warn",
+        title: t.label + " — " + DAYNAMES[t.day] + " " + minsToLabel(hmToMins(t.start)),
+        note: "Skipped " + missed + " of the last " + seen + " times. Either it is at the wrong hour or it is not really a commitment.",
+        actLabel: "Remove it from the template",
+        act: function () { S.templates = S.templates.filter(function (q) { return q.id !== t.id; }); toast("Removed"); }
+      });
+    }
+  });
+
+  /* overdue milestones — repick the date rather than carry the guilt */
+  S.milestones.filter(function (m) {
+    return !m.done && m.due && daysBetween(k, m.due) < -7;
+  }).slice(0, 3).forEach(function (m) {
+    var key = "od:" + m.id;
+    if (S.dismissed[key]) return;
+    var late = -daysBetween(k, m.due);
+    out.push({
+      key: key, tag: late + "d overdue", cls: "bad",
+      title: m.title,
+      note: "A date that has passed by " + late + " days is not a plan. Move it or drop it.",
+      actLabel: "Push it out a month",
+      act: function () { m.due = dkey(addDays(today(), 30)); toast("Moved to " + m.due); }
+    });
+  });
+
+  /* last week's completion rate — only if the week was actually used */
+  var last = addDays(weekStartOf(today()), -7), tot = 0, done = 0, used = 0;
+  for (var i = 0; i < 7; i++) {
+    var d2 = addDays(last, i), k2 = dkey(d2);
+    if (!dayHasEvidence(d2)) continue;
+    used++;
+    blocksFor(d2).forEach(function (b) { tot++; if (blockState(k2, b.key).done) done++; });
+  }
+  if (used < 3) tot = 0;
+  if (tot >= 5 && done / tot < 0.5 && !S.dismissed["load:" + dkey(last)]) {
+    out.push({
+      key: "load:" + dkey(last), tag: Math.round(done / tot * 100) + "% kept", cls: "warn",
+      title: "You kept " + done + " of " + tot + " blocks last week",
+      note: "Schedule less this week. A plan you keep beats a plan you admire — this is the number the whole audit was about.",
+      actLabel: null
+    });
+  }
+
+  /* a project with something due and nothing on the calendar */
+  S.projects.forEach(function (p) {
+    var due = S.milestones.filter(function (m) {
+      return m.projectId === p.id && !m.done && m.due && daysBetween(k, m.due) >= 0 && daysBetween(k, m.due) <= 21;
+    })[0];
+    if (!due) return;
+    var booked = false;
+    for (var i = 0; i < 21 && !booked; i++) {
+      booked = blocksFor(addDays(today(), i)).some(function (b) { return b.projectId === p.id; });
+    }
+    if (booked) return;
+    var key = "cold:" + p.id;
+    if (S.dismissed[key]) return;
+    out.push({
+      key: key, tag: "nothing blocked", cls: "warn",
+      title: p.name + " has nothing on the calendar",
+      note: "“" + due.title + "” is due in " + daysBetween(k, due.due) + " days and there is no block for this project in the next three weeks.",
+      actLabel: "Block it",
+      act: function () {
+        var sl = S.sliders.filter(function (s) { return s.name === due.slider; })[0];
+        var when = proposeBlock({ projectId: p.id, sliderId: sl ? sl.id : null, title: due.title, by: due.due });
+        toast("Blocked " + fmtDate(when));
+      }
+    });
+  });
+
+  /* worst first, and never a wall of them */
+  var rank = { bad: 0, warn: 1, "": 2 };
+  out.sort(function (a, b) { return (rank[a.cls] || 2) - (rank[b.cls] || 2); });
+  return out.slice(0, 6);
+}
+
+/* ============================ AUDIT ============================
+   Quarterly, at each Memento. The app assembles the evidence; the thinking
+   happens in a Claude conversation you paste it into. */
+function viewAudit(root) {
+  document.getElementById("tbsub").textContent = "Audit";
+  var wrap = h("div", "stack g20");
+
+  var next = S.mementos.filter(function (m) { return daysBetween(dkey(today()), m.due) >= 0; })[0];
+  var head = h("div", "stack g6");
+  head.appendChild(h("div", "eyebrow", "Once a quarter"));
+  head.appendChild(h("div", "h-lg", next ? "Memento " + next.n + "<br>" + esc(next.label) : "All Mementos written"));
+  if (next) {
+    var n = daysBetween(dkey(today()), next.due);
+    head.appendChild(h("div", "muted", next.due + " · " + (n === 0 ? "today" : "in " + n + " days") +
+      ". This is when the field plan itself gets rewritten — not a status update."));
+  }
+  wrap.appendChild(head);
+
+  var brief = buildAuditBrief();
+  var c = h("div", "card");
+  c.appendChild(h("div", "eyebrow", "This quarter's brief"));
+  c.appendChild(h("div", "dim", "Built from what actually happened. Copy it into Claude and let it ask you the hard questions — that is where the audit happens."));
+  var pre = h("pre", "auditpre"); pre.textContent = brief;
+  c.appendChild(pre);
+  var cp = h("button", "btn wide"); cp.textContent = "Copy the brief";
+  on(cp, "click", function () {
+    navigator.clipboard.writeText(brief).then(
+      function () { toast("Copied — paste it into Claude"); },
+      function () { toast("Select the text and copy manually"); });
+  });
+  c.appendChild(cp);
+  wrap.appendChild(c);
+
+  var ms = h("div", "sec");
+  ms.appendChild(sechead("The schedule", S.mementos.length + " to graduation"));
+  S.mementos.forEach(function (m) {
+    var n = daysBetween(dkey(today()), m.due);
+    var card = h("div", "card");
+    card.appendChild(h("div", "h-md", "Memento " + m.n + " — " + esc(m.label)));
+    card.appendChild(h("div", "dim", m.due + (n >= 0 ? " · in " + n + " days" : " · passed")));
+    ms.appendChild(card);
+  });
+  wrap.appendChild(ms);
+
+  root.appendChild(wrap);
+}
+
+function buildAuditBrief() {
+  var k = dkey(today()), L = [];
+  L.push("DETOUR — QUARTERLY AUDIT BRIEF");
+  L.push("Generated " + fmtLong(today()) + " · " + weeksToGrad() + " weeks to graduation");
+  L.push("");
+
+  L.push("MILESTONES");
+  S.projects.forEach(function (p) {
+    var mine = S.milestones.filter(function (m) { return m.projectId === p.id; });
+    if (!mine.length) return;
+    var done = mine.filter(function (m) { return m.done; }).length;
+    var late = mine.filter(function (m) { return !m.done && m.due && daysBetween(k, m.due) < 0; });
+    L.push("  " + p.name + " [" + p.priority + "] — " + done + "/" + mine.length + " done" +
+           (late.length ? ", " + late.length + " overdue" : ""));
+    late.forEach(function (m) { L.push("      overdue " + (-daysBetween(k, m.due)) + "d: " + m.title); });
+  });
+  L.push("");
+
+  L.push("BLOCKS KEPT, LAST 12 WEEKS");
+  var byProj = {};
+  for (var i = 0; i < 84; i++) {
+    var d = addDays(today(), -i), dk2 = dkey(d);
+    blocksFor(d).forEach(function (b) {
+      var id = b.projectId || "none";
+      if (!byProj[id]) byProj[id] = { t: 0, d: 0 };
+      byProj[id].t++;
+      if (blockState(dk2, b.key).done) byProj[id].d++;
+    });
+  }
+  Object.keys(byProj).forEach(function (id) {
+    var p = project(id), s = byProj[id];
+    L.push("  " + (p ? p.name : "Unassigned") + ": " + s.d + "/" + s.t +
+           " (" + Math.round(s.d / Math.max(1, s.t) * 100) + "%)");
+  });
+  L.push("");
+
+  var recent = S.progress.filter(function (e) { return e.at; }).slice(-6);
+  if (recent.length) {
+    L.push("RECENT SUNDAY ENTRIES");
+    recent.forEach(function (e) {
+      L.push("  Week of " + e.weekKey + " — goals: " + (e.goals || []).filter(Boolean).join("; "));
+    });
+    L.push("");
+  }
+
+  if (S.reflections.length) {
+    L.push("REFLECTIONS SINCE LAST QUARTER");
+    S.reflections.slice(-8).forEach(function (r) {
+      L.push("  " + r.ts.slice(0, 10) + ": " + r.text.replace(/\s+/g, " ").slice(0, 200));
+    });
+    L.push("");
+  }
+
+  L.push("ASK ME:");
+  L.push("  1. Which of these milestones is prestige rather than progress?");
+  L.push("  2. What did I schedule repeatedly and never do — and what does that say?");
+  L.push("  3. Where am I building a system instead of shipping the thing?");
+  L.push("  4. Which dates should move, and which should simply be dropped?");
+  L.push("  5. What has changed about what I want since the last Memento?");
+  return L.join("\n");
+}
+
 /* ---------------- ROUTINES ---------------- */
 function viewRoutines(root) {
   document.getElementById("tbsub").textContent = "Routines";
@@ -1414,6 +2092,9 @@ function viewRoutines(root) {
     list.forEach(function (r) { sec.appendChild(routineRow(r)); });
     wrap.appendChild(sec);
   });
+  var back = h("button", "btn ghost wide"); back.textContent = "‹ Back to WWW";
+  on(back, "click", function () { view = "www"; render(); });
+  wrap.appendChild(back);
   var add = h("button", "btn ghost wide"); add.textContent = "+ Add routine";
   on(add, "click", function () {
     openSheet("New routine", function (body) {
@@ -1454,6 +2135,9 @@ function openMenu() {
         if (window.DETOUR && window.DETOUR.syncPanel) window.DETOUR.syncPanel();
         else toast("sync.js did not load");
       }));
+    body.appendChild(menuBtn("Routines", "Daily, weekly, monthly — they reset themselves", function () {
+      closeSheet(); view = "routines"; render();
+    }));
     body.appendChild(menuBtn("Weekly template", "The recurring blocks that generate every week", editTemplates));
     body.appendChild(menuBtn("All open tasks", S.tasks.filter(function (t) { return !t.done; }).length + " across every slider", function () {
       var open = S.tasks.filter(function (t) { return !t.done; }).sort(function (a, b) {
