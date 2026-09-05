@@ -1,191 +1,62 @@
 window.DETOUR_SEED = {
- "tasks": [
- {
-  "id": "k01",
-  "sliderId": "e170bea8eb",
-  "projectId": "professional",
-  "title": "Email the current EMA Alumni Relations Director to find time to meet",
-  "due": "2026-08-26",
-  "note": "You are running for their seat. Ask what the job actually costs per week, and what they wish they'd known.",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "k02",
-  "sliderId": "e170bea8eb",
-  "projectId": "professional",
-  "title": "Check the EMA board application the day it goes up",
-  "due": "2026-08-26",
-  "note": "Director of Alumni Relations, year one.",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "k03",
-  "sliderId": "e170bea8eb",
-  "projectId": "professional",
-  "title": "Meet with the current Alumni Relations Director",
-  "due": "2026-09-04",
-  "note": "",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "k04",
-  "sliderId": "e170bea8eb",
-  "projectId": "professional",
-  "title": "Submit the EMA Director of Alumni Relations application",
-  "due": "2026-09-02",
-  "note": "",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "k05",
-  "sliderId": "4620f197bc",
-  "projectId": "professional",
-  "title": "Pick one center and say it out loud — Price, Easton or MEMES",
-  "due": "2026-09-30",
-  "note": "Price owns the capstone. Deep in one beats shallow in three.",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "k06",
-  "sliderId": "c4ad3ee6f3",
-  "projectId": "professional",
-  "title": "Follow up on the Off Record Sound application",
-  "due": "2026-09-08",
-  "note": "Sent 25 Aug. Two weeks of silence is a nudge, not a no.",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "k07",
-  "sliderId": "98fe52e687",
-  "projectId": "music",
-  "title": "Tell someone the October date for TGNS and SWAGBOYS",
-  "due": "2026-08-31",
-  "note": "A release date only exists once another person is expecting it.",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "q01",
-  "sliderId": "e170bea8eb",
-  "projectId": "professional",
-  "title": "Get the FY27 Iowa Hillel budget approved",
-  "due": "2026-09-30",
-  "note": "Carried over when the old milestone list was replaced. The handoff is January; the budget itself is a September job.",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "q02",
-  "sliderId": "4620f197bc",
-  "projectId": "professional",
-  "title": "Register the BCC prerequisites inside the Year-1 plan",
-  "due": "2026-12-11",
-  "note": "",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "q03",
-  "sliderId": "4620f197bc",
-  "projectId": "professional",
-  "title": "Turn Adam Brainin into a BCC team, and find two more like him",
-  "due": "2026-12-11",
-  "note": "",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "q04",
-  "sliderId": "4620f197bc",
-  "projectId": "professional",
-  "title": "One faculty advocate — Lyn, Mef or Matt — who knows the whole plan",
-  "due": "2026-12-11",
-  "note": "",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "q05",
-  "sliderId": "4620f197bc",
-  "projectId": "professional",
-  "title": "Build the networking tracker: one sheet, an Anderson column and a Detour column",
-  "due": "2026-09-30",
-  "note": "",
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "q06",
-  "sliderId": "e170bea8eb",
-  "projectId": "professional",
-  "title": "Submit the EA and AnderTech applications",
-  "due": "2026-09-30",
-  "note": "",
-  "done": false,
-  "doneAt": null
- }
-],
- "blockRoutines": {
- "4620f197bc": [
+ "pillars": [
   {
-   "id": "s1",
-   "text": "Update the task tracker"
+   "id": "progress",
+   "name": "Progress",
+   "tag": "Social sim",
+   "color": "#8AA0E0",
+   "blurb": "Connections and learning at Anderson, and keeping wellness at a proper level."
   },
   {
-   "id": "s2",
-   "text": "Canvas alignment — announcements and assignments"
+   "id": "play",
+   "name": "Play",
+   "tag": "RPG",
+   "color": "#E0AE4C",
+   "blurb": "Inspired by archiving new media, understanding it through StudioVault, and finally creating your own through Music Prod."
   },
   {
-   "id": "s3",
-   "text": "Communication catch-up — email, WhatsApp, Slack, LinkedIn, networking tracker"
-  },
-  {
-   "id": "s4",
-   "text": "Run the 3-2-1 check on everything due this week"
-  },
-  {
-   "id": "s5",
-   "text": "Put anything new straight onto WWW, then stop"
+   "id": "preservation",
+   "name": "Preservation",
+   "tag": "Save file",
+   "color": "#63C295",
+   "blurb": "Financially stable, and able to encapsulate the story."
   }
- ]
-},
+ ],
  "projects": [
   {
    "id": "professional",
    "num": "01",
+   "pillar": "progress",
    "name": "Professional Project",
    "priority": "Primary",
    "color": "#8AA0E0",
    "purpose": "Convert into a career that runs three lanes at once — producing, StudioVault, artist management — using Anderson's centers, faculty and classmates as the machinery rather than doing it alone.",
-   "mindset": "A Tuesday in 2028 opens with StudioVault admin — my team, this week's goals. Midday is artist management, likely inside a label. The day ends in a studio session. Three lanes, one financially stable career, and no version of it that requires a job I would hate. Anderson is where the team, the platform and the relationships came from."
+   "mindset": "A Tuesday in 2028 opens with StudioVault admin — my team, this week's goals. Midday is artist management, likely inside a label. The day ends in a studio session. Three lanes, one financially stable career, and no version of it that requires a job I would hate."
   },
   {
    "id": "wellness",
    "num": "02",
+   "pillar": "progress",
    "name": "Wellness Project",
    "priority": "Maintenance",
    "color": "#63C295",
    "purpose": "Plan the week on Sunday in ten minutes, then stop thinking about it — a healthy life that costs decisions once rather than attention continuously.",
-   "mindset": "Workouts and meals are planned every Sunday and I know the week's plan before it starts. Ten to twelve healthy recipes in rotation with Lilly. Weekly, monthly and biannual routines run in the background and keep me prepared for the week, the month and the year ahead — without hours of planning."
+   "mindset": "Workouts and meals are planned every Sunday and I know the week's plan before it starts. Routines run in the background and keep me prepared for the week, the month and the year ahead."
   },
   {
-   "id": "music",
+   "id": "archive",
    "num": "03",
-   "name": "Music Production",
+   "pillar": "play",
+   "name": "Archive Project",
    "priority": "Primary",
-   "color": "#E0AE4C",
-   "purpose": "Get music finished and released on fixed dates, with other people — because a deadline and a collaborator is the only mechanism that has ever worked for you.",
-   "mindset": "I release on a schedule and it is no longer a hard thing to do. I have produced for artists Ethan Deetz would vouch for. My catalog is finished, released or deliberately archived rather than sitting in Logic. And I am confident putting out serious music under my own name — which is the part that was actually stopping me."
+   "color": "#C99BE0",
+   "purpose": "Keep developing the taste and archival craft you genuinely enjoy, on a schedule, and point its output at StudioVault and at what you produce.",
+   "mindset": "Reviewing is fast enough that I actually do it, and I have a real, defensible view of the underground. My archive is one system rather than five spreadsheets, and it feeds StudioVault directly."
   },
   {
    "id": "studiovault",
    "num": "04",
+   "pillar": "play",
    "name": "StudioVault",
    "priority": "Primary",
    "color": "#4ED6CB",
@@ -193,17 +64,19 @@ window.DETOUR_SEED = {
    "mindset": "StudioVault is a working platform with real users, real contributors and a revenue stream. Artists check their own page. It is my Business Creation Capstone, it has a team, and it is the reason people in the underground know who I am."
   },
   {
-   "id": "archive",
+   "id": "music",
    "num": "05",
-   "name": "Archive Project",
-   "priority": "Secondary",
-   "color": "#C99BE0",
-   "purpose": "Keep developing the taste and archival craft you genuinely enjoy, on a schedule, and point its output at StudioVault and at what you produce.",
-   "mindset": "Reviewing is fast enough that I actually do it, and I have a real, defensible view of the underground. My archive is one system rather than five spreadsheets, and it feeds StudioVault directly. My consoles still work and I never turned that into a project."
+   "pillar": "play",
+   "name": "Music Prod",
+   "priority": "Primary",
+   "color": "#E0AE4C",
+   "purpose": "Get music finished and released on fixed dates, with other people — because a deadline and a collaborator is the only mechanism that has ever worked for you.",
+   "mindset": "I release on a schedule and it is no longer a hard thing to do. I have produced for artists Ethan Deetz would vouch for. And I am confident putting out serious music under my own name — which is the part that was actually stopping me."
   },
   {
    "id": "finances",
    "num": "06",
+   "pillar": "preservation",
    "name": "Finances",
    "priority": "Maintenance",
    "color": "#7FB3D5",
@@ -213,1200 +86,1890 @@ window.DETOUR_SEED = {
   {
    "id": "memoir",
    "num": "07",
+   "pillar": "preservation",
    "name": "Memoir",
    "priority": "Seasonal",
    "color": "#E0806C",
    "purpose": "Preserve the raw material now, while it is cheap and still recoverable, and write the eras on a named schedule instead of an open one.",
-   "mindset": "Everything is preserved, structured and searchable from high school onward. I have written high school and college in my own voice. The Anderson era wrote itself, because I was writing Mementos the whole time. And I know when the next one gets written."
+   "mindset": "Everything is preserved, structured and searchable from high school onward. I have written high school and college in my own voice. And I know when the next one gets written."
   }
  ],
- "sliders": [
+ "blocks": [
   {
-   "id": "4620f197bc",
+   "id": "k-anderson",
    "projectId": "professional",
-   "name": "Maximizing Anderson",
-   "definition": "How you use Anderson itself — coursework, centers, faculty, classmates, the capstone. Boundary rule: if the milestone would still exist had you never enrolled, it belongs to another project. That rule moves 22 of its 38 milestones to the projects that own them and drops 7 more, leaving 9 — which is the real slider.",
-   "outcome": "Course plan executed around the Entertainment Management specialization and the Business Creation Capstone prerequisites. Deep in one center rather than shallow in three. BCC completed with StudioVault and a real team. Lyn, Mef and Matt are people who would take your call in 2030."
+   "name": "Anderson Block",
+   "kind": "recurring",
+   "target": 6,
+   "flexible": false,
+   "definition": "Weekday block after class, plus one at the weekend. The standing container for coursework, the task tracker, communications and Canvas."
   },
   {
-   "id": "c4ad3ee6f3",
+   "id": "k-classcenter",
    "projectId": "professional",
-   "name": "Entertainment Career Conversion",
-   "definition": "The job. Pay, position and standing in the industry — Otherside, Off Record Sound, management work, label relationships, royalties. Boundary rule: if it produces money or a title it lives here; if it produces a song it lives in Artist Collaboration.",
-   "outcome": "Paid work in music — management, platform, production or some combination — with royalty income arriving and a post-Anderson path that does not depend on a corporate fallback."
+   "name": "Class & Center Commitments",
+   "kind": "recurring",
+   "target": 3,
+   "flexible": true,
+   "definition": "Classes, center events and leadership obligations, section happy hours. These are pinned to real clock times — they are the anchors the rest of the day flows around."
   },
   {
-   "id": "e170bea8eb",
+   "id": "k-otherside",
    "projectId": "professional",
-   "name": "Leadership/Community",
-   "definition": "Finishing what you committed to, an EMA role that generates industry access rather than administration, and two or three LA communities that feel like family.",
-   "outcome": "Iowa Hillel closed clean with a successor set up. EMA measurably better for your having been in it. A small circle in LA that is not transactional."
+   "name": "Otherside Intern Work",
+   "kind": "recurring",
+   "target": 2,
+   "flexible": false,
+   "definition": "The intern work itself, or whatever paid music position replaces it."
   },
   {
-   "id": "310350efa2",
+   "id": "k-morning",
    "projectId": "wellness",
-   "name": "Workout Project",
-   "definition": "One community that expects you, plus whatever solo work you want around it. Planned Sunday, not tracked daily.",
-   "outcome": "You have belonged to a group for eighteen months. You never tracked adherence and never needed to."
+   "name": "Morning Routine",
+   "kind": "recurring",
+   "target": 7,
+   "flexible": false,
+   "definition": "Nine items, every morning. Ticks reset daily."
   },
   {
-   "id": "1792b12021",
+   "id": "k-night",
    "projectId": "wellness",
-   "name": "Cooking Project",
-   "definition": "Ten to twelve healthy recipes in rotation, chosen on Sunday, shopped once.",
-   "outcome": "Meal planning takes minutes. Neither of you thinks about food during the week."
+   "name": "Night Routine",
+   "kind": "recurring",
+   "target": 7,
+   "flexible": false,
+   "definition": "Five items, three of them Monday, Wednesday and Thursday only."
   },
   {
-   "id": "408540ebe2",
+   "id": "k-workout",
    "projectId": "wellness",
-   "name": "Routines",
-   "definition": "Daily, weekly, monthly and biannual routines. The checklist lives in the Detour app; the slider exists so you can deliberately change a routine when life changes.",
-   "outcome": "Routines run without you thinking about them, and you have modified them twice on purpose rather than twenty times by accident."
+   "name": "Workouts",
+   "kind": "recurring",
+   "target": 5,
+   "flexible": false,
+   "definition": "Five a week. Current split is 2 Pu, 2 Cardio, 1 Pu."
   },
   {
-   "id": "a54f005627",
-   "projectId": "music",
-   "name": "Creative Identity (IO)",
-   "definition": "Staying connected to what excites you, and letting the sound be recognised in finished work rather than described in a statement. Your words: it is something you notice in the wild before you start, not something you write afterwards.",
-   "outcome": "Three cohesive projects that obviously came from the same person, and a reference library you actually use."
+   "id": "k-sunday",
+   "projectId": "wellness",
+   "name": "Sunday Chores",
+   "kind": "recurring",
+   "target": 1,
+   "flexible": false,
+   "definition": "Eleven items, about an hour and a half plus laundry. The weekly reset."
   },
   {
-   "id": "7625c1a119",
-   "projectId": "music",
-   "name": "Production Engine (PD)",
-   "definition": "The craft of producing — song structure, arrangement, what you take from production coursework, and a repeatable process for getting from a loop to an artist-ready track. Not file management; that is a tool's job.",
-   "outcome": "You can take an idea to a finished, session-ready arrangement without stalling, and you can name what you learned that made that true."
+   "id": "k-monthly",
+   "projectId": "wellness",
+   "name": "Monthly Wellness Routine",
+   "kind": "recurring",
+   "target": 0,
+   "flexible": false,
+   "definition": "Five parts: re-ups, doctors, trimming, cleaning, monthly Detour projects. About an hour and a half plus laundry."
   },
   {
-   "id": "98fe52e687",
-   "projectId": "music",
-   "name": "Artist Collaboration (WWO)",
-   "definition": "Making things with other people — sessions, beats placed, songs finished. The craft side of working with musicians, as distinct from the job side, which is Entertainment Career Conversion.",
-   "outcome": "Four or five recurring collaborators in LA who are not Justin, Kris or CJ, and finished work with people who were strangers in 2026."
+   "id": "k-halfyear",
+   "projectId": "wellness",
+   "name": "Half-Yearly Routine",
+   "kind": "recurring",
+   "target": 0,
+   "flexible": false,
+   "definition": "Cleaning service, the big Detour projects, decluttering, and the Memento."
   },
   {
-   "id": "4598f2d0c2",
-   "projectId": "music",
-   "name": "Catalog & Releases (SC)",
-   "definition": "A fixed release calendar. The date decides when a track is done — which is the answer to the question you have been asking for years. Two lanes: public releases that build the record, and private packs that build relationships.",
-   "outcome": "A two-year run of quarterly public releases, a backlog that is finished, released or deliberately archived, and beat packs circulating among artists who use them."
+   "id": "k-archiving",
+   "projectId": "archive",
+   "name": "Archiving Block",
+   "kind": "recurring",
+   "target": 2,
+   "flexible": false,
+   "definition": "Update what media you've been consuming and get your thoughts into the tracker quickly. The only recurring block in this project."
   },
   {
-   "id": "d179a7ccd2",
+   "id": "k-sv-archive",
    "projectId": "studiovault",
-   "name": "Site Progress",
-   "definition": "The platform itself — accounts, search, artist pages, contribution, community. You were right that a plain page of archives is just extra clicks; the meeting-place is the point.",
-   "outcome": "A stable public site out of beta, with accounts, search and a working contribution flow, maintained without constant repair."
+   "name": "The Archive Block",
+   "kind": "recurring",
+   "target": 3,
+   "flexible": true,
+   "definition": "As many as fit in the week. Archiving artists into StudioVault — it will never be perfect; do the best you can by the date."
   },
   {
-   "id": "10463c1a7d",
-   "projectId": "studiovault",
-   "name": "The Archive",
-   "definition": "The body of documented artists, in two tiers: a machine-built spine across many artists, and deep media-enterprise coverage on a few. New dimension — nothing in the old structure owned the archives themselves.",
-   "outcome": "Hundreds of artists with an accurate spine, dozens with real enterprise depth, and corrections arriving from the people being documented."
-  },
-  {
-   "id": "bb43189ac5",
+   "id": "k-sv-community",
    "projectId": "studiovault",
    "name": "Community Outreach / Feedback",
-   "definition": "The readers, contributors and artists — and Off Record Sound as both income and sourcing.",
-   "outcome": "Contributors who add archives without being asked, and artists who ask to be included."
+   "kind": "recurring",
+   "target": 1,
+   "flexible": true,
+   "definition": "Getting the community in and listening to what comes back."
   },
   {
-   "id": "338e7c85dc",
+   "id": "k-sv-site",
+   "projectId": "studiovault",
+   "name": "Site Progress",
+   "kind": "manual",
+   "target": 0,
+   "flexible": false,
+   "definition": "Held when a site milestone is close. Not something to grind weekly."
+  },
+  {
+   "id": "k-sv-biz",
    "projectId": "studiovault",
    "name": "Business Structure",
-   "definition": "Parked until Winter 2027, when BCC gives it a team, faculty and a deadline. It does not go dormant: you run it through coursework — StudioVault is the company you analyse in Accounting.",
-   "outcome": "A business model tested inside BCC with a team, not a plan written alone in year one."
+   "kind": "manual",
+   "target": 0,
+   "flexible": false,
+   "definition": "IP, the LLC, and eventually the capstone paperwork."
   },
   {
-   "id": "ebdcefcb48",
-   "projectId": "archive",
-   "name": "Archive Spreadsheet",
-   "definition": "R&D for the public work: reviewing, scoring and archiving media fast enough that you keep doing it. Lives inside the Detour app rather than in its own file.",
-   "outcome": "A fast review loop you use weekly, a real underground rap and R&B stream inside it, and at least one deep case study that became a StudioVault flagship."
+   "id": "k-pineboys",
+   "projectId": "music",
+   "name": "Pine Boys Block",
+   "kind": "recurring",
+   "target": 1,
+   "flexible": false,
+   "definition": "Catch up, game, and work on music with Justin."
   },
   {
-   "id": "9b4ef7c76d",
-   "projectId": "archive",
-   "name": "Console Modding",
-   "definition": "Enjoyment. Deliberately unmeasured, deliberately unoptimised.",
-   "outcome": "Still fun. Possibly one absurd side quest — an ultimate edition of a favourite game, playable on native hardware."
+   "id": "k-solo",
+   "projectId": "music",
+   "name": "Solo Music Prod",
+   "kind": "recurring",
+   "target": 2,
+   "flexible": true,
+   "definition": "Your own production, structured with your IO and aimed at a specific audience. Study others' production and develop your own plugins."
   },
   {
-   "id": "5421cfc68e",
-   "projectId": "archive",
-   "name": "Media Inventory",
-   "definition": "The physical collection, kept honest. One in, one out.",
-   "outcome": "Everything you own, you own on purpose — and you actually listen to the vinyl."
-  },
-  {
-   "id": "83535dc77f",
-   "projectId": "finances",
-   "name": "Budgeting",
-   "definition": "One monthly review inside the Detour app: income in, spending categorised, buffer checked, and the number you can put into Detour.",
-   "outcome": "Twenty consecutive monthly reviews, each under fifteen minutes, and a post-graduation budget built from real Anderson-era data."
-  },
-  {
-   "id": "eab903428f",
-   "projectId": "finances",
-   "name": "Investing",
-   "definition": "Ten minutes a month of fake money, inside the same routine — a pet project that teaches you the process without costing you attention or capital you do not have.",
-   "outcome": "Two years of documented paper decisions and the judgment to know whether real-money investing is worth starting after graduation."
-  },
-  {
-   "id": "82be1baec4",
-   "projectId": "memoir",
-   "name": "Text Archiving",
-   "definition": "Everything preserved and searchable — texts, photos, documents, coursework, Mementos — extracted, structured and timelined. Mapping merges in here: once the corpus exists, a timeline is a query, not a project.On the name: you liked the idea and hated the word. If you want one, Stems — the separated raw tracks you mix a song from. The archive is the stems; a written era is the mix. Otherwise Text Archiving is fine and it is already yours.",
-   "outcome": "Complete and safe from high school through graduation. Nothing important lives only on one device."
-  },
-  {
-   "id": "b54e2ba93d",
-   "projectId": "memoir",
-   "name": "Writing",
-   "definition": "One era at a time, in your voice, on named dates. AI can summarise and retrieve; it does not get to have the opinions.",
-   "outcome": "High school and college written honestly, Chicago scheduled, and an annual practice that keeps future years from piling up into another decade-long backlog."
+   "id": "k-wwo",
+   "projectId": "music",
+   "name": "WWO Music Prod",
+   "kind": "manual",
+   "target": 0,
+   "flexible": false,
+   "definition": "Collaborating with others on a mutual project in LA. Three tasks, then audit and turn it into a routine."
   }
  ],
  "milestones": [
- {
-  "id": "62e3505e5f",
-  "projectId": "wellness",
-  "slider": "Workout Project",
-  "title": "Show up to Santa Monica Run Club, BruinStrong and one Anderson fitness group. Pick one by September 30.",
-  "why": "You named all three and said early September. The whole slider is this one decision.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": false,
-  "done": false,
-  "doneAt": null
+  {
+   "id": "m01",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Create the networking tracker — Anderson names for BCC and the internship, Detour names for workout and music partners.",
+   "why": "One list, two columns. Without it, networking stays a feeling instead of a queue you work through.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": true,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m02",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Apply for student org leadership — EMA, EA, AnderTech.",
+   "why": "Three applications, one window, early in the fall.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m03",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Finish Mef's book and meet with him.",
+   "why": "Reading it is the price of the meeting being worth anything.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m04",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Ninety days in: Lyn's coffee chats done, three centers met, a BCC plan agreed with Prof. Wu.",
+   "why": "The Parker method on Lyn's list. A pitch ready for Tech, Entrepreneurship and CEMES. Go in expecting to be corrected — faculty feedback is the point.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m05",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Secure a paid position in underground music.",
+   "why": "Pay or a title, not a song. This is the milestone that makes the Professional Project real rather than academic.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m06",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Email UCLA Library Special Collections and the Ethnomusicology Archive.",
+   "why": "Two emails. The archive world at UCLA is a resource nobody in your cohort is using.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m07",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "FY27 budget approved and the Hillel treasurer role finished.",
+   "why": "The term ends 1 January 2027; the budget itself has to clear well before that.",
+   "term": "Winter / Spring 2027",
+   "due": "2027-01-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m08",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Summer 2027 settled — internship, fellowship or venture.",
+   "why": "Decided by March, not discovered in May. The biggest fork in the two years.",
+   "term": "Winter / Spring 2027",
+   "due": "2027-03-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m09",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Summer internship or fellowship completed.",
+   "why": "Finished and behind you, with something to show and someone who would hire you again.",
+   "term": "Fall 2027",
+   "due": "2027-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m10",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Money coming in during year two — StudioVault through Price Center resources, production through Otherside and Ethan Deetz.",
+   "why": "Two named channels, not a hope.",
+   "term": "Fall 2027",
+   "due": "2027-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m11",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Apply to BCC.",
+   "why": "The application is the easy part. The team and the traction take a year, which is why the earlier milestones exist.",
+   "term": "Fall 2027",
+   "due": "2027-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m12",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "StudioVault capstone completed.",
+   "why": "BCC run to the end with StudioVault as the subject.",
+   "term": "Spring 2028",
+   "due": "2028-04-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m13",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Graduate with several revenue sources — StudioVault, production splits, and a paid artist management seat.",
+   "why": "The graduation mindset stated as a count rather than a feeling.",
+   "term": "Spring 2028",
+   "due": "2028-05-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m14",
+   "projectId": "wellness",
+   "blockId": null,
+   "title": "Update the cooking sheet with Crock Pot recipes.",
+   "why": "Slow cooker meals are the ones that survive a heavy quarter.",
+   "term": "Fall 2026",
+   "due": "2026-08-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m15",
+   "projectId": "wellness",
+   "blockId": null,
+   "title": "Create a plan to start working out with others at the UCLA gym.",
+   "why": "One community that expects you beats a routine you track.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m16",
+   "projectId": "wellness",
+   "blockId": null,
+   "title": "Create a plan to start a run club.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m17",
+   "projectId": "wellness",
+   "blockId": null,
+   "title": "Create a plan to start BruinFit.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m18",
+   "projectId": "wellness",
+   "blockId": null,
+   "title": "Confirm a schedule for workouts and cooking.",
+   "why": "From here on, this project is reflected on in the quarterly Memento audits rather than tracked weekly.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m19",
+   "projectId": "archive",
+   "blockId": "k-archiving",
+   "title": "Update the Archiving Spreadsheet, including the feature that builds music reviews in your voice from a quick voice memo.",
+   "why": "The write-up step is the one that has always failed. Automate exactly that.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": true,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m20",
+   "projectId": "archive",
+   "blockId": "k-archiving",
+   "title": "Complete the Frank Ocean reviews.",
+   "why": "The proof-of-concept guinea pig project.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m21",
+   "projectId": "archive",
+   "blockId": "k-archiving",
+   "title": "Audit the Archive.",
+   "why": "To be defined at the audit.",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m22",
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "title": "Have the full ttbby archive put in.",
+   "why": "Proof of concept, and the artist you know best.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m23",
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "title": "Pick an artist with a dedicated underground community, complete their page, and recruit a mod from another platform.",
+   "why": "The first person who isn't you adding something is the whole thesis.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m24",
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "title": "Have five artists completely archived.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m25",
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "title": "Audit the Archive block.",
+   "why": "To be defined at the audit.",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m26",
+   "projectId": "studiovault",
+   "blockId": "k-sv-community",
+   "title": "Create an opportunity for the community to give feedback on the platform.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m27",
+   "projectId": "studiovault",
+   "blockId": "k-sv-community",
+   "title": "Finalise the content plan and begin posting. Attempt an interview with an artist.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m28",
+   "projectId": "studiovault",
+   "blockId": "k-sv-community",
+   "title": "Wait for community feedback, then audit.",
+   "why": "To be defined once feedback is in.",
+   "term": "Later",
+   "due": "",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m29",
+   "projectId": "studiovault",
+   "blockId": "k-sv-site",
+   "title": "Complete the beta — Chicago Era ideas combined with the ingestion agent and the Underground Hip Hop Researcher focus.",
+   "why": "The one site milestone that matters right now.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m30",
+   "projectId": "studiovault",
+   "blockId": "k-sv-site",
+   "title": "Wait for community feedback, then audit the site.",
+   "why": "To be defined once feedback is in.",
+   "term": "Later",
+   "due": "",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m31",
+   "projectId": "studiovault",
+   "blockId": "k-sv-biz",
+   "title": "Work with a lawyer to protect the IP and form the LLC.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m32",
+   "projectId": "studiovault",
+   "blockId": "k-sv-biz",
+   "title": "Audit the business structure when you begin working with Parker / ACT / EA.",
+   "why": "To be defined at the audit.",
+   "term": "Later",
+   "due": "",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m33",
+   "projectId": "music",
+   "blockId": "k-pineboys",
+   "title": "Release TGNS.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m34",
+   "projectId": "music",
+   "blockId": "k-pineboys",
+   "title": "Release SWAGBOYS.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m35",
+   "projectId": "music",
+   "blockId": "k-pineboys",
+   "title": "Release Chicago Bounce.",
+   "why": "",
+   "term": "Winter 2026",
+   "due": "2026-12-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m36",
+   "projectId": "music",
+   "blockId": "k-pineboys",
+   "title": "Audit Pine Boys.",
+   "why": "To be defined at the audit.",
+   "term": "Winter 2026",
+   "due": "2026-12-31",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m37",
+   "projectId": "music",
+   "blockId": "k-solo",
+   "title": "Create the Logic Scanner.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": true,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m38",
+   "projectId": "music",
+   "blockId": "k-solo",
+   "title": "Put together the full EA — OPN class, Ethan Deetz resources, Tape Notes / MWTM — and one-off song structures for TGNS, SWAGBOYS and the ttbby beat pack.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m39",
+   "projectId": "music",
+   "blockId": "k-solo",
+   "title": "Release the ttbby beat pack.",
+   "why": "The private lane: packs build relationships.",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m40",
+   "projectId": "music",
+   "blockId": "k-solo",
+   "title": "Finish the Rick Rubin book.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-10-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m41",
+   "projectId": "music",
+   "blockId": "k-solo",
+   "title": "Audit Solo.",
+   "why": "To be defined at the audit.",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m42",
+   "projectId": "music",
+   "blockId": "k-wwo",
+   "title": "Begin DJing with Chad (AnderRoom).",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m43",
+   "projectId": "music",
+   "blockId": "k-wwo",
+   "title": "Reach out to Hannah for advice on home mic setups.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m44",
+   "projectId": "music",
+   "blockId": "k-wwo",
+   "title": "Meet with Gutty when he's in town.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m45",
+   "projectId": "music",
+   "blockId": "k-wwo",
+   "title": "Work in the studio with Ethan Deetz.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m46",
+   "projectId": "music",
+   "blockId": "k-wwo",
+   "title": "Audit WWO.",
+   "why": "To be defined at the audit.",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m47",
+   "projectId": "finances",
+   "blockId": null,
+   "title": "Audit the finances routine and craft a new monthly one — loan sheet (Juno, JSLA, Federal) and an income section (ORS position, royalties, StudioVault).",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m48",
+   "projectId": "finances",
+   "blockId": null,
+   "title": "Use Claude to build an investing routine you'll run with fake money after budgeting each month.",
+   "why": "Ten minutes of paper investing, monthly. Not a trading habit.",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m49",
+   "projectId": "finances",
+   "blockId": null,
+   "title": "Audit how Finances are going.",
+   "why": "To be defined at the audit.",
+   "term": "Fall 2026",
+   "due": "2026-11-30",
+   "tbd": true,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m50",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Finalise the Memento at the end of Summer Quarter with current goals and reflection.",
+   "why": "",
+   "term": "Fall 2026",
+   "due": "2026-09-30",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m51",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Write the Memento at the end of Winter Quarter.",
+   "why": "",
+   "term": "Winter 2026",
+   "due": "2026-12-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m52",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Leverage AI to archive all texts through the Chicago Era, saving images and documents with proper dates.",
+   "why": "",
+   "term": "Winter 2026",
+   "due": "2026-12-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m53",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Decide the mapping categories for the High School, College and Chicago eras, and map the text archive to them.",
+   "why": "This builds the skeleton for the writing.",
+   "term": "Winter 2026",
+   "due": "2026-12-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m54",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Write the High School Era memoir.",
+   "why": "",
+   "term": "Winter / Spring 2027",
+   "due": "2027-01-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m55",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Write the College Era memoir.",
+   "why": "",
+   "term": "Summer 2027",
+   "due": "2027-08-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "m56",
+   "projectId": "memoir",
+   "blockId": null,
+   "title": "Write the Chicago Era memoir.",
+   "why": "",
+   "term": "Winter 2028",
+   "due": "2028-01-31",
+   "tbd": false,
+   "build": false,
+   "done": false,
+   "doneAt": null
+  }
+ ],
+ "tasks": [
+  {
+   "id": "t01",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Hillel pictures",
+   "due": null,
+   "note": "",
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "t02",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Reach out to Uncle Sam's connections again for coffee chats",
+   "due": null,
+   "note": "",
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "t03",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Get CA licence and plates, update voter registration",
+   "due": null,
+   "note": "",
+   "done": false,
+   "doneAt": null
+  },
+  {
+   "id": "t04",
+   "projectId": "professional",
+   "blockId": null,
+   "title": "Hillel board financial materials, financial calendar, dashboard for board meetings, endowment sustainability review",
+   "due": null,
+   "note": "",
+   "done": false,
+   "doneAt": null
+  }
+ ],
+ "blockTemplates": [
+  {
+   "id": "w01",
+   "day": 1,
+   "label": "Anderson Block",
+   "start": "16:30",
+   "mins": 90,
+   "projectId": "professional",
+   "blockId": "k-anderson",
+   "kind": "anderson",
+   "pin": false
+  },
+  {
+   "id": "w02",
+   "day": 2,
+   "label": "Anderson Block",
+   "start": "16:30",
+   "mins": 90,
+   "projectId": "professional",
+   "blockId": "k-anderson",
+   "kind": "anderson",
+   "pin": false
+  },
+  {
+   "id": "w03",
+   "day": 3,
+   "label": "Anderson Block",
+   "start": "16:30",
+   "mins": 90,
+   "projectId": "professional",
+   "blockId": "k-anderson",
+   "kind": "anderson",
+   "pin": false
+  },
+  {
+   "id": "w04",
+   "day": 4,
+   "label": "Anderson Block",
+   "start": "16:30",
+   "mins": 90,
+   "projectId": "professional",
+   "blockId": "k-anderson",
+   "kind": "anderson",
+   "pin": false
+  },
+  {
+   "id": "w05",
+   "day": 5,
+   "label": "Anderson Block",
+   "start": "16:30",
+   "mins": 90,
+   "projectId": "professional",
+   "blockId": "k-anderson",
+   "kind": "anderson",
+   "pin": false
+  },
+  {
+   "id": "w06",
+   "day": 6,
+   "label": "Anderson Block",
+   "start": "13:00",
+   "mins": 90,
+   "projectId": "professional",
+   "blockId": "k-anderson",
+   "kind": "anderson",
+   "pin": false
+  },
+  {
+   "id": "w07",
+   "day": 3,
+   "label": "Otherside Intern Work",
+   "start": "14:00",
+   "mins": 120,
+   "projectId": "professional",
+   "blockId": "k-otherside",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w08",
+   "day": 5,
+   "label": "Otherside Intern Work",
+   "start": "14:00",
+   "mins": 120,
+   "projectId": "professional",
+   "blockId": "k-otherside",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w09",
+   "day": 0,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w10",
+   "day": 1,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w11",
+   "day": 2,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w12",
+   "day": 3,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w13",
+   "day": 4,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w14",
+   "day": 5,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w15",
+   "day": 6,
+   "label": "Morning Routine",
+   "start": "07:30",
+   "mins": 30,
+   "projectId": "wellness",
+   "blockId": "k-morning",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w16",
+   "day": 0,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w17",
+   "day": 1,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w18",
+   "day": 2,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w19",
+   "day": 3,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w20",
+   "day": 4,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w21",
+   "day": 5,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w22",
+   "day": 6,
+   "label": "Night Routine",
+   "start": "22:00",
+   "mins": 20,
+   "projectId": "wellness",
+   "blockId": "k-night",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w23",
+   "day": 1,
+   "label": "Workout — Pu",
+   "start": "07:00",
+   "mins": 60,
+   "projectId": "wellness",
+   "blockId": "k-workout",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w24",
+   "day": 2,
+   "label": "Workout — Cardio",
+   "start": "07:00",
+   "mins": 60,
+   "projectId": "wellness",
+   "blockId": "k-workout",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w25",
+   "day": 3,
+   "label": "Workout — Pu",
+   "start": "07:00",
+   "mins": 60,
+   "projectId": "wellness",
+   "blockId": "k-workout",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w26",
+   "day": 4,
+   "label": "Workout — Cardio",
+   "start": "07:00",
+   "mins": 60,
+   "projectId": "wellness",
+   "blockId": "k-workout",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w27",
+   "day": 6,
+   "label": "Workout — Pu",
+   "start": "07:00",
+   "mins": 60,
+   "projectId": "wellness",
+   "blockId": "k-workout",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w28",
+   "day": 0,
+   "label": "Sunday Chores",
+   "start": "10:00",
+   "mins": 90,
+   "projectId": "wellness",
+   "blockId": "k-sunday",
+   "kind": "routine",
+   "pin": false
+  },
+  {
+   "id": "w29",
+   "day": 2,
+   "label": "Archiving Block",
+   "start": "20:00",
+   "mins": 45,
+   "projectId": "archive",
+   "blockId": "k-archiving",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w30",
+   "day": 6,
+   "label": "Archiving Block",
+   "start": "20:00",
+   "mins": 45,
+   "projectId": "archive",
+   "blockId": "k-archiving",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w31",
+   "day": 1,
+   "label": "The Archive Block",
+   "start": "19:00",
+   "mins": 90,
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w32",
+   "day": 3,
+   "label": "The Archive Block",
+   "start": "19:00",
+   "mins": 90,
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w33",
+   "day": 0,
+   "label": "The Archive Block",
+   "start": "14:00",
+   "mins": 90,
+   "projectId": "studiovault",
+   "blockId": "k-sv-archive",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w34",
+   "day": 4,
+   "label": "Community Outreach / Feedback",
+   "start": "19:00",
+   "mins": 60,
+   "projectId": "studiovault",
+   "blockId": "k-sv-community",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w35",
+   "day": 5,
+   "label": "Pine Boys Block",
+   "start": "19:00",
+   "mins": 120,
+   "projectId": "music",
+   "blockId": "k-pineboys",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w36",
+   "day": 2,
+   "label": "Solo Music Prod",
+   "start": "18:30",
+   "mins": 90,
+   "projectId": "music",
+   "blockId": "k-solo",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w37",
+   "day": 6,
+   "label": "Solo Music Prod",
+   "start": "10:30",
+   "mins": 120,
+   "projectId": "music",
+   "blockId": "k-solo",
+   "kind": "project",
+   "pin": false
+  },
+  {
+   "id": "w38",
+   "day": 0,
+   "label": "Sunday plan + progress",
+   "start": "17:00",
+   "mins": 45,
+   "projectId": null,
+   "blockId": null,
+   "kind": "ritual",
+   "pin": false
+  }
+ ],
+ "routines": [
+  {
+   "id": "r001",
+   "name": "Brush teeth",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r002",
+   "name": "Vitamin C serum",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r003",
+   "name": "SPF lotion",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r004",
+   "name": "Leave-in conditioner",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r005",
+   "name": "Deodorant / cologne",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r006",
+   "name": "Take Omeprazole",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r007",
+   "name": "Take vitamins",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r008",
+   "name": "Ice globes",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r009",
+   "name": "Pack lunch",
+   "period": "daily",
+   "part": "Morning"
+  },
+  {
+   "id": "r010",
+   "name": "Floss",
+   "period": "daily",
+   "part": "Night",
+   "days": [
+    1,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "r011",
+   "name": "Brush teeth",
+   "period": "daily",
+   "part": "Night"
+  },
+  {
+   "id": "r012",
+   "name": "Tretinoin cream (Rx)",
+   "period": "daily",
+   "part": "Night"
+  },
+  {
+   "id": "r013",
+   "name": "Mouthwash",
+   "period": "daily",
+   "part": "Night",
+   "days": [
+    1,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "r014",
+   "name": "Retainer",
+   "period": "daily",
+   "part": "Night",
+   "days": [
+    1,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "r015",
+   "name": "Laundry",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r016",
+   "name": "Take out trash — actual, both bathrooms, office",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r017",
+   "name": "Take out recycling",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r018",
+   "name": "Wipe down tables — living room, island, both bathrooms",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r019",
+   "name": "Clean up office",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r020",
+   "name": "Clean out fridge",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r021",
+   "name": "Detour Progress",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r022",
+   "name": "Clean water bottle",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r023",
+   "name": "Update recipes and go grocery shopping",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r024",
+   "name": "In the shower — shave back of neck, pluck eyebrows",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r025",
+   "name": "Spray shoes (end of night)",
+   "period": "weekly",
+   "part": "Sunday chores"
+  },
+  {
+   "id": "r026",
+   "name": "EZMelts",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r027",
+   "name": "Pantene shampoo / Herbal Essences conditioner",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r028",
+   "name": "CeraVe Renewing Salicylic Acid Cleanser",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r029",
+   "name": "Tree of Life Vitamin C serum",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r030",
+   "name": "CeraVe SPF lotion",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r031",
+   "name": "Steroid cream",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r032",
+   "name": "Aquaphor tub",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r033",
+   "name": "Floss picks",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r034",
+   "name": "Shaving cream / aftershave",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r035",
+   "name": "OneBlade / safety blade / ProGlide razors",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r036",
+   "name": "ACT Anticavity Zero Alcohol Fluoride mouthwash",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r037",
+   "name": "Briogeo Farewell Frizz",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r038",
+   "name": "Lotion",
+   "period": "monthly",
+   "part": "Re-ups"
+  },
+  {
+   "id": "r039",
+   "name": "Review the doctor roster — anyone to contact this month?",
+   "period": "monthly",
+   "part": "Doctors",
+   "note": "Immunologist Dr. Evelyn Angulo · Podiatrist Mark Berman · Primary care Dr. Bhojwani · Dentist Dr. Mullarky · Orthodontist Weintraub & Eltink · Skin Dr. Nicolai Kessler · Chiropractor Dr. Brian Marion · PT Dr. Lauren Schnidman · Nutritionist Michael Glab"
+  },
+  {
+   "id": "r040",
+   "name": "Scrape tongue",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r041",
+   "name": "Legs — 2.5 inch",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r042",
+   "name": "Arms — 2.5 inch",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r043",
+   "name": "Armpits — no guard",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r044",
+   "name": "Chest — no guard",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r045",
+   "name": "Full trim — neck",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r046",
+   "name": "Full trim — shoulders",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r047",
+   "name": "Full trim — groin",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r048",
+   "name": "Full trim — nose",
+   "period": "monthly",
+   "part": "Trimming"
+  },
+  {
+   "id": "r049",
+   "name": "Swiffer floor",
+   "period": "monthly",
+   "part": "Cleaning"
+  },
+  {
+   "id": "r050",
+   "name": "Dust off room, including the fan",
+   "period": "monthly",
+   "part": "Cleaning"
+  },
+  {
+   "id": "r051",
+   "name": "Wash pillowcases and bedsheet",
+   "period": "monthly",
+   "part": "Cleaning"
+  },
+  {
+   "id": "r052",
+   "name": "Change toothbrush head",
+   "period": "monthly",
+   "part": "Cleaning",
+   "note": "March, June, September, December"
+  },
+  {
+   "id": "r053",
+   "name": "Change razors — ProGlide and safety; Norelco with the toothbrush head",
+   "period": "monthly",
+   "part": "Cleaning"
+  },
+  {
+   "id": "r054",
+   "name": "Budget sheet",
+   "period": "monthly",
+   "part": "Monthly Detour projects"
+  },
+  {
+   "id": "r055",
+   "name": "Pay rent",
+   "period": "monthly",
+   "part": "Monthly Detour projects"
+  },
+  {
+   "id": "r056",
+   "name": "Update workout spreadsheet",
+   "period": "monthly",
+   "part": "Monthly Detour projects"
+  },
+  {
+   "id": "r057",
+   "name": "Cleaning service",
+   "period": "biannual",
+   "part": "Cleaning"
+  },
+  {
+   "id": "r058",
+   "name": "Update the Detour Museum",
+   "period": "biannual",
+   "part": "Detour projects"
+  },
+  {
+   "id": "r059",
+   "name": "Ensure refined tasks and milestones are updated and finalised",
+   "period": "biannual",
+   "part": "Detour projects"
+  },
+  {
+   "id": "r060",
+   "name": "Update the RFRA file",
+   "period": "biannual",
+   "part": "Detour projects"
+  },
+  {
+   "id": "r061",
+   "name": "Update the Archive spreadsheet, Libib and the other online media platforms",
+   "period": "biannual",
+   "part": "Detour projects"
+  },
+  {
+   "id": "r062",
+   "name": "Memoir text archive — save everything down, delete everything a year old or more",
+   "period": "biannual",
+   "part": "Detour projects",
+   "note": "May take the whole of June / December. Try to finish inside a month."
+  },
+  {
+   "id": "r063",
+   "name": "Media inventory — sell off media you no longer want",
+   "period": "biannual",
+   "part": "Detour projects"
+  },
+  {
+   "id": "r064",
+   "name": "Clothes — donate what you no longer wear",
+   "period": "biannual",
+   "part": "Detour projects"
+  },
+  {
+   "id": "r065",
+   "name": "Update the decluttering spreadsheet and follow the routine",
+   "period": "biannual",
+   "part": "Decluttering"
+  },
+  {
+   "id": "r066",
+   "name": "Clean up emails and passwords",
+   "period": "biannual",
+   "part": "Decluttering"
+  },
+  {
+   "id": "r067",
+   "name": "File cleaning on computer, storages and drives — write out a routine for this",
+   "period": "biannual",
+   "part": "Decluttering"
+  },
+  {
+   "id": "r068",
+   "name": "Detour Memento",
+   "period": "biannual",
+   "part": "Memento"
+  }
+ ],
+ "blockRoutines": {
+  "k-anderson": [
+   {
+    "id": "s1",
+    "text": "Update the task tracker"
+   },
+   {
+    "id": "s2",
+    "text": "Canvas alignment — announcements and assignments"
+   },
+   {
+    "id": "s3",
+    "text": "Communication catch-up — email, WhatsApp, Slack, LinkedIn, networking tracker"
+   },
+   {
+    "id": "s4",
+    "text": "Run the 3-2-1 check on everything due this week"
+   },
+   {
+    "id": "s5",
+    "text": "Put anything new straight onto WWW, then stop"
+   }
+  ]
  },
- {
-  "id": "5932032dfc",
-  "projectId": "wellness",
-  "slider": "Routines",
-  "title": "Move the routines checklist into the Detour app.",
-  "why": "Twenty-three of the 29 Routines milestones are checklist items. They stop being milestones the moment they have a home.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "96cec8539e",
-  "projectId": "wellness",
-  "slider": "Workout Project",
-  "title": "Eight consecutive weeks with the chosen group.",
-  "why": "If it holds through your first heavy quarter it will hold. If it does not, change the group, not the system.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "b7ac263c8f",
-  "projectId": "wellness",
-  "slider": "Cooking Project",
-  "title": "Rebuild the ten-to-twelve recipe core with Lilly, and start the Sunday plan.",
-  "why": "One Sunday ritual covers workouts, meals and the week's Detour blocks. Do not build three rituals.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "387d95d6d8",
-  "projectId": "wellness",
-  "slider": "Workout Project",
-  "title": "One check-in at the end of the first heavy quarter.",
-  "why": "Is this sustainable? One question, once a year.",
-  "term": "Winter 2027 onward",
-  "due": "2027-03-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "3517d842aa",
-  "projectId": "music",
-  "slider": "Catalog & Releases (SC)",
-  "title": "Put the release dates in the calendar and tell someone: TGNS and SWAGBOYS in October, Chicago Bounce over Thanksgiving, Pine Boys in December.",
-  "why": "This is your calendar, not mine, and it is well designed — the first two are collaborations, which is exactly right given that solo release is the thing you are not yet confident about. You build the confidence on the work you already trust.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "af8278008d",
-  "projectId": "music",
-  "slider": "Production Engine (PD)",
-  "title": "Build the Logic scanner.",
-  "why": "Two evenings. It retires the four audit milestones you have already missed, and it is what makes a music block start with work instead of with searching.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "32e08e62a6",
-  "projectId": "music",
-  "slider": "Catalog & Releases (SC)",
-  "title": "Release TGNS and SWAGBOYS in October.",
-  "why": "Breaking the seal is worth more than anything else in these 110 milestones. Two eras have passed without a public release; every month it waits, it gets heavier.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "6aa5adc3a1",
-  "projectId": "music",
-  "slider": "Artist Collaboration (WWO)",
-  "title": "Finish a self-released beat pack for Otherside artists.",
-  "why": "Your idea, and a good one — it is the private lane. A pack is a lower-stakes way to get your production in front of professionals than asking for a session, and it is the infrastructure you said you wanted before approaching people.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "81711c0620",
-  "projectId": "music",
-  "slider": "Catalog & Releases (SC)",
-  "title": "Release Chicago Bounce over Thanksgiving.",
-  "why": "Second date. The cadence is the system.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "536fb12c79",
-  "projectId": "music",
-  "slider": "Artist Collaboration (WWO)",
-  "title": "After the October release, ask Ethan Deetz for one introduction.",
-  "why": "You said you would rather work with professionals Deetz would vouch for than with strangers — agreed, and that replaces the Antoine and Nardo milestone. But note the trap in your own reasoning: you also said you do not feel comfortable approaching people until you have infrastructure to show. Infrastructure is infinitely deferrable. The release and the beat pack are the infrastructure; ask after October whether or not it feels ready.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "1ef8d3ceaf",
-  "projectId": "music",
-  "slider": "Catalog & Releases (SC)",
-  "title": "Pine Boys album in December, then a spring release.",
-  "why": "Four public releases inside a year, from a baseline of roughly one every two years.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-06-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "424cf0c80c",
-  "projectId": "music",
-  "slider": "Production Engine (PD)",
-  "title": "Take what the production coursework gives you into a repeatable loop-to-arrangement process.",
-  "why": "This is the Production Engine slider doing its actual job — the craft, not the folders.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-06-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "b1d11baf94",
-  "projectId": "music",
-  "slider": "Artist Collaboration (WWO)",
-  "title": "Three sessions with people outside the Justin / Kris / CJ circle.",
-  "why": "Measured in rooms, not relationships.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-06-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "c50ffd6300",
-  "projectId": "music",
-  "slider": "Artist Collaboration (WWO)",
-  "title": "Protect two sessions a week whatever the summer role turns out to be.",
-  "why": "The only stretch without coursework. If it goes entirely to an internship, Year 2 starts from a standstill.",
-  "term": "Summer 2027",
-  "due": "2027-09-03",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "607848d9d5",
-  "projectId": "music",
-  "slider": "Catalog & Releases (SC)",
-  "title": "Resolve 1MILLIONdaysofsummer, HARD CROISSANT II and R&D — finish, release, or archive on purpose.",
-  "why": "Each is either an asset or a weight, and right now they are all weights because none has a decision attached. R&D especially: it is the one you have carried longest.",
-  "term": "Fall 2027 → Spring 2028",
-  "due": "2028-05-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "42f75c1919",
-  "projectId": "studiovault",
-  "slider": "Site Progress",
-  "title": "Take the few weekends and get the site out of beta.",
-  "why": "You estimated a few weekends and you have already proven the estimate during Tech Immersion. The one condition: the app comes first and it is time-boxed, because two builds at once is how neither ships.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "6cf130758b",
-  "projectId": "studiovault",
-  "slider": "Business Structure",
-  "title": "Analyse StudioVault in your Accounting coursework instead of in a 34-milestone slider.",
-  "why": "This answers your objection directly. You said if StudioVault cannot operate as a business it has no place at Anderson — true, and the place to prove that is a class that already meets three times a week and grades you on it.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "ee3452ad1d",
-  "projectId": "studiovault",
-  "slider": "The Archive",
-  "title": "Build the Tier 1 ingestion. Spines for 100+ underground artists.",
-  "why": "Discography, credits, features, labels, links — machine-assembled. This is what makes the site useful on day one and searchable enough that people stay.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "fd81125dee",
-  "projectId": "studiovault",
-  "slider": "The Archive",
-  "title": "Publish ttbby as the first Tier 2 archive.",
-  "why": "You already run his fan page, which means you already have the enterprise-layer knowledge that is impossible to scrape. Start where you have an unfair advantage.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "e80feb74e7",
-  "projectId": "studiovault",
-  "slider": "Site Progress",
-  "title": "Ship the correction flow with the first public pages.",
-  "why": "Machine-ingested data has errors, and publishing a wrong fact about an artist is the one mistake that costs credibility in a scene this small. A visible verified-or-not state plus a one-click correction turns your biggest risk into your contribution hook — which is exactly how RateYourMusic got its data.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "de849c22da",
-  "projectId": "studiovault",
-  "slider": "Community Outreach / Feedback",
-  "title": "Land the Off Record Sound role and treat its research as StudioVault's sourcing.",
-  "why": "Paid, and it feeds the archive. Your wholesale-information idea for underground rap accounts is the business model hiding inside it — write it down now, use it in BCC in 2027.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "2905dbe065",
-  "projectId": "studiovault",
-  "slider": "The Archive",
-  "title": "Tier 2 depth on five to eight artists, chosen from the scene you actually know.",
-  "why": "Tier 1 makes the site useful. Tier 2 is what makes it different from Discogs. Both, in that order.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-06-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "ad1b78ae3c",
-  "projectId": "studiovault",
-  "slider": "Business Structure",
-  "title": "BCC application with StudioVault, a team, and users.",
-  "why": "This is where Business Structure comes back — once, with people.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-06-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "317df3c978",
-  "projectId": "studiovault",
-  "slider": "Site Progress",
-  "title": "Run BCC. Launch V1.0 — but not in the same quarter BCC starts.",
-  "why": "Your Memento had the public launch on October 31, 2027, landing on top of BCC's first quarter. Move the launch.",
-  "term": "Summer 2027 → Spring 2028",
-  "due": "2028-05-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "d8e2f50ac0",
-  "projectId": "studiovault",
-  "slider": "Community Outreach / Feedback",
-  "title": "Contributors maintaining archives without you.",
-  "why": "The only real test of whether it is a community or a personal website.",
-  "term": "Summer 2027 → Spring 2028",
-  "due": "2028-05-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "1c645225a2",
-  "projectId": "archive",
-  "slider": "Archive Spreadsheet",
-  "title": "Build the two-minute voice review.",
-  "why": "You already ran this experiment and it worked: you reviewed Lil Boat into a voice memo after watching the Lil Yachty story, and you said it was fun. The only thing that failed was the transcription-to-writeup step, which is now free. Go find that voice memo.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "3b12263b5e",
-  "projectId": "archive",
-  "slider": "Archive Spreadsheet",
-  "title": "Give R&D a recurring block. One evening a week, media only.",
-  "why": "Your own diagnosis: this project stalls because listening and watching are never allotted time. It is also the project you enjoy most, which makes protecting it a wellness decision as much as a work one.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "efdd11a1cd",
-  "projectId": "archive",
-  "slider": "Archive Spreadsheet",
-  "title": "Finish Frank Ocean. You stopped after Nostalgia, Ultra.",
-  "why": "The guinea pig from the original experiment, and you now live in the city where he broke. Finishing it proves the loop works end to end.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "0934430e91",
-  "projectId": "archive",
-  "slider": "Archive Spreadsheet",
-  "title": "Email UCLA Library Special Collections and the Ethnomusicology Archive.",
-  "why": "You agreed StudioVault should align with the Center for Oral History Research's methodology — that is one email, and it retires an editorial-standards milestone outright. The Archive of Popular American Music is the other conversation worth having.",
-  "term": "Fall 2026",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "a7b6324151",
-  "projectId": "archive",
-  "slider": "Archive Spreadsheet",
-  "title": "One deep case study that becomes a StudioVault Tier 2 flagship.",
-  "why": "Proof the craft transfers, and the piece that shows people what StudioVault is for.",
-  "term": "2027",
-  "due": "2027-12-17",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "9d05e478a5",
-  "projectId": "finances",
-  "slider": "Budgeting",
-  "title": "One audit day. Build the monthly review into the Detour app.",
-  "why": "You already specified it: import income, loans and spending; get back a picture and a Detour number. One afternoon buys two years of ten-minute months.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "4f77f32f40",
-  "projectId": "finances",
-  "slider": "Budgeting",
-  "title": "Write the one-page loan sheet: Juno, Jewish Student Loan Fund, Federal $20,500.",
-  "why": "First time carrying loans. Balances, rates, when interest starts, when repayment starts. It should not live in your head.",
-  "term": "Now → end of Summer Quarter",
-  "due": "2026-09-18",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "9809f9a959",
-  "projectId": "finances",
-  "slider": "Budgeting",
-  "title": "Run it on the first of the month, with ten minutes of paper investing attached.",
-  "why": "Running it is the system. There is nothing further to design.",
-  "term": "Fall 2026 onward",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "f2f7b7952e",
-  "projectId": "finances",
-  "slider": "Budgeting",
-  "title": "Track the income side as it appears: Off Record Sound, royalties, StudioVault.",
-  "why": "The interesting half of this project is no longer spending. It is that you now have several possible income lines and no picture of them.",
-  "term": "Fall 2026 onward",
-  "due": "2026-12-11",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "bddefc45a8",
-  "projectId": "memoir",
-  "slider": "Text Archiving",
-  "title": "The extraction push. Everything through the Chicago era, in one concentrated stretch.",
-  "why": "The only work in all of Detour where waiting causes permanent loss — you said it yourself: foggy memories preserved perfectly in digital form, on a phone that could die tomorrow. It is also the bottleneck that stalled this project for years, and it is now a weekend.",
-  "term": "Winter break 2026",
-  "due": "2026-12-31",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "58843298a3",
-  "projectId": "memoir",
-  "slider": "Writing",
-  "title": "Draft the High School era.",
-  "why": "Chronological, as you wanted, and the era you said you were still forming interests in — which makes it the one that explains the rest.",
-  "term": "Winter break 2027",
-  "due": "2027-12-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "5da54fc6ae",
-  "projectId": "memoir",
-  "slider": "Writing",
-  "title": "Draft the College era.",
-  "why": "You said college is where Detour crystallised. It is also the longest, so it gets the summer rather than a two-week break.",
-  "term": "Summer 2028 — after graduation",
-  "due": "2028-08-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "432b27c71e",
-  "projectId": "memoir",
-  "slider": "Writing",
-  "title": "Draft the Chicago era, roughly seven years out.",
-  "why": "Inside your own ten-year rule, and by then you will know what the Chicago era was for — which you cannot know yet.",
-  "term": "Winter 2028 / 2029",
-  "due": "2029-01-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "395eae5d1d",
-  "projectId": "memoir",
-  "slider": "Text Archiving",
-  "title": "Quarterly Mementos, at the end of each Anderson quarter.",
-  "why": "Roughly seven more before graduation — numbers 21 through 27 — which means the Anderson era is written as it happens and never needs reconstructing. Each one triggers the Detour review: reflect, update, schedule.",
-  "term": "Ongoing, from now",
-  "due": null,
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "bfc0388725",
-  "projectId": "memoir",
-  "slider": "Writing",
-  "title": "From 2028, one year-in-review each summer, built from that year's four Mementos.",
-  "why": "This is the answer to your question about life no longer arriving in three-year eras. After the backlog is cleared, the memoir becomes annual chapters rather than era books — a few hours a year instead of another decade of accumulation.",
-  "term": "Ongoing, from now",
-  "due": null,
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p01",
-  "projectId": "professional",
-  "slider": "Maximizing Anderson",
-  "title": "Create the networking tracker — Anderson names for BCC and the internship, Detour names for workout and music partners.",
-  "why": "One list, two columns. Without it, networking stays a feeling instead of a queue you work through. It is a build, so give it an evening and stop.",
-  "term": "Fall 2026",
-  "due": "2026-09-30",
-  "build": true,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p02",
-  "projectId": "professional",
-  "slider": "Leadership/Community",
-  "title": "Apply for student org leadership — EMA, EA, AnderTech.",
-  "why": "Three applications, one window, early in the fall. EMA is the one that puts you near music; the others only earn a slot if they cost little.",
-  "term": "Fall 2026",
-  "due": "2026-09-30",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p03",
-  "projectId": "professional",
-  "slider": "Maximizing Anderson",
-  "title": "Ninety days in: Lyn's coffee chats done, three centers met, a BCC plan agreed with Prof. Wu.",
-  "why": "The Parker method on Lyn's list. A pitch ready for Tech, Entrepreneurship and CEMES. One sit-down with Prof. Wu that turns the capstone from an idea into a plan. Go in expecting to be corrected — faculty feedback is the point.",
-  "term": "Fall 2026",
-  "due": "2026-10-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p04",
-  "projectId": "professional",
-  "slider": "Entertainment Career Conversion",
-  "title": "Secure a paid position in underground music.",
-  "why": "Pay or a title, not a song. Otherside, Off Record Sound, or something Ethan Deetz would vouch for. This is the milestone that makes the Professional Project real rather than academic.",
-  "term": "Fall 2026",
-  "due": "2026-10-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p05",
-  "projectId": "professional",
-  "slider": "Leadership/Community",
-  "title": "FY27 budget approved and the Hillel treasurer role handed off clean.",
-  "why": "The term ends 1 January 2027, but the budget itself has to clear in September — leaving it to December hands your successor a mess. That September date lives as a task under this milestone.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-01-01",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p06",
-  "projectId": "professional",
-  "slider": "Entertainment Career Conversion",
-  "title": "Summer 2027 settled — internship, fellowship or venture.",
-  "why": "Decided by March, not discovered in May. Choosing between a paid seat somewhere and betting the summer on StudioVault is the biggest fork in the two years.",
-  "term": "Winter / Spring 2027",
-  "due": "2027-03-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p07",
-  "projectId": "professional",
-  "slider": "Entertainment Career Conversion",
-  "title": "Summer internship or fellowship completed.",
-  "why": "Finished and behind you, with something to show and someone who would hire you again.",
-  "term": "Summer 2027",
-  "due": "2027-09-30",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p08",
-  "projectId": "professional",
-  "slider": "Entertainment Career Conversion",
-  "title": "Money coming in during year two — StudioVault through Price Center resources, production through Otherside and Ethan Deetz.",
-  "why": "Two named channels, not a hope. Price Center resources exist to be used. Production income arrives through people who already know your work.",
-  "term": "Summer 2027",
-  "due": "2027-09-30",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p09",
-  "projectId": "professional",
-  "slider": "Maximizing Anderson",
-  "title": "Apply to BCC with StudioVault, a team and traction.",
-  "why": "The application is the easy part. The team and the traction take a year, which is exactly why the earlier milestones exist.",
-  "term": "Fall 2027",
-  "due": "2027-10-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p10",
-  "projectId": "professional",
-  "slider": "Maximizing Anderson",
-  "title": "StudioVault capstone completed.",
-  "why": "BCC run to the end with StudioVault as the subject. This is where the parked business-structure work finally happens — inside coursework instead of beside it.",
-  "term": "Spring 2028",
-  "due": "2028-04-30",
-  "build": false,
-  "done": false,
-  "doneAt": null
- },
- {
-  "id": "p11",
-  "projectId": "professional",
-  "slider": "Entertainment Career Conversion",
-  "title": "Graduate with several revenue sources — StudioVault, production splits, and a paid artist management seat.",
-  "why": "The graduation mindset stated as a count rather than a feeling: more than one source of income, and no version of it that needs a job you would hate.",
-  "term": "Spring 2028",
-  "due": "2028-05-31",
-  "build": false,
-  "done": false,
-  "doneAt": null
- }
-],
  "ninety": [
   {
    "id": "n01",
    "n": "01",
-   "title": "Send the Off Record Sound application.",
-   "detail": "The only item on your list with someone else's deadline. Income, sourcing for StudioVault, and standing in the scene — the rare thing that moves all three Professional lanes at once.",
-   "when": "This week",
+   "title": "Complete the StudioVault beta.",
+   "when": "September",
+   "detail": "Chicago Era ideas plus the ingestion agent and the Underground Hip Hop Researcher focus. Everything else in StudioVault waits behind it.",
    "done": false
   },
   {
    "id": "n02",
    "n": "02",
-   "title": "Detour app v0. One weekend, ugly, Sunday plan only.",
-   "detail": "You named scheduling as the bottleneck six times. Everything else on this page assumes blocks exist. If it runs long, abandon it and go build StudioVault.",
-   "when": "Before September ends",
+   "title": "Finalise Memento 21.",
+   "when": "End of Summer Quarter",
+   "detail": "The quarter's reflection and the goals that follow it. This is where the field plan gets rewritten.",
    "done": false
   },
   {
    "id": "n03",
    "n": "03",
-   "title": "Get the FY27 Iowa Hillel budget approved.",
-   "detail": "A board is waiting, the term ends January 1, and it is the one commitment where other people carry the cost of you being late.",
-   "when": "September",
+   "title": "Release TGNS and SWAGBOYS.",
+   "when": "October",
+   "detail": "Both collaborations. A release date only exists once another person is expecting it.",
    "done": false
   },
   {
    "id": "n04",
    "n": "04",
-   "title": "Release TGNS and SWAGBOYS.",
-   "detail": "Two eras without a public release. Both are collaborations, which is the right first move given where your confidence actually is.",
+   "title": "Secure a paid underground music position.",
    "when": "October",
+   "detail": "Pay or a title. The milestone that makes the Professional Project real.",
    "done": false
   },
   {
    "id": "n05",
    "n": "05",
-   "title": "EMA role taken, one center entered, Adam Brainin talking about a team.",
-   "detail": "Not three centers. One, chosen because it owns the capstone. And a capstone team is built by showing people something, which is why this sits after the release and the site.",
-   "when": "By late November",
+   "title": "The ninety-day Anderson push.",
+   "when": "By end of October",
+   "detail": "Student org applications in, Lyn's coffee chats done, three centers met, and a BCC plan agreed with Prof. Wu.",
    "done": false
-  }
- ],
- "later": [
-  {
-   "title": "ttbby's archive",
-   "detail": "After the site weekends. November or December, not now."
-  },
-  {
-   "title": "The Logic scanner",
-   "detail": "After app v0. It is two evenings and it will still be two evenings in October."
-  },
-  {
-   "title": "Tier 1 ingestion",
-   "detail": "Fall, once the site is out of beta."
-  },
-  {
-   "title": "Frank Ocean review",
-   "detail": "Once the R&D block exists. The block first, the content second."
-  },
-  {
-   "title": "Memoir extraction",
-   "detail": "Winter break. Nothing before December."
-  },
-  {
-   "title": "Workout community",
-   "detail": "Cheap and worth doing now — three visits in September, one choice by the 30th. It does not compete with anything."
-  }
- ],
- "stop": "Auditing. Every one of the twenty overdue milestones in your Memento is an audit, a definition, a confirmation or a document — and this workshop was the last one you needed. The next thing you produce should be visible to somebody else.",
- "blockTemplates": [
- {
-  "id": "t01",
-  "day": 1,
-  "label": "Anderson Block",
-  "start": "16:30",
-  "mins": 90,
-  "projectId": "professional",
-  "kind": "anderson",
-  "sliderId": "4620f197bc"
- },
- {
-  "id": "t02",
-  "day": 2,
-  "label": "Anderson Block",
-  "start": "16:30",
-  "mins": 90,
-  "projectId": "professional",
-  "kind": "anderson",
-  "sliderId": "4620f197bc"
- },
- {
-  "id": "t03",
-  "day": 3,
-  "label": "Anderson Block",
-  "start": "16:30",
-  "mins": 90,
-  "projectId": "professional",
-  "kind": "anderson",
-  "sliderId": "4620f197bc"
- },
- {
-  "id": "t04",
-  "day": 4,
-  "label": "Anderson Block",
-  "start": "16:30",
-  "mins": 90,
-  "projectId": "professional",
-  "kind": "anderson",
-  "sliderId": "4620f197bc"
- },
- {
-  "id": "t05",
-  "day": 5,
-  "label": "Anderson Block",
-  "start": "16:30",
-  "mins": 90,
-  "projectId": "professional",
-  "kind": "anderson",
-  "sliderId": "4620f197bc"
- },
- {
-  "id": "t06",
-  "day": 2,
-  "label": "Workout",
-  "start": "07:00",
-  "mins": 60,
-  "projectId": "wellness",
-  "kind": "workout",
-  "sliderId": "310350efa2"
- },
- {
-  "id": "t07",
-  "day": 4,
-  "label": "Workout",
-  "start": "07:00",
-  "mins": 60,
-  "projectId": "wellness",
-  "kind": "workout",
-  "sliderId": "310350efa2"
- },
- {
-  "id": "t08",
-  "day": 6,
-  "label": "Run club",
-  "start": "09:00",
-  "mins": 75,
-  "projectId": "wellness",
-  "kind": "workout",
-  "sliderId": "310350efa2"
- },
- {
-  "id": "t09",
-  "day": 1,
-  "label": "Archive R&D",
-  "start": "19:30",
-  "mins": 90,
-  "projectId": "archive",
-  "kind": "project",
-  "sliderId": "ebdcefcb48"
- },
- {
-  "id": "t10",
-  "day": 2,
-  "label": "StudioVault",
-  "start": "19:00",
-  "mins": 120,
-  "projectId": "studiovault",
-  "kind": "project",
-  "sliderId": "d179a7ccd2"
- },
- {
-  "id": "t11",
-  "day": 3,
-  "label": "Music Production",
-  "start": "19:00",
-  "mins": 120,
-  "projectId": "music",
-  "kind": "project",
-  "sliderId": "98fe52e687"
- },
- {
-  "id": "t12",
-  "day": 4,
-  "label": "StudioVault",
-  "start": "19:00",
-  "mins": 120,
-  "projectId": "studiovault",
-  "kind": "project",
-  "sliderId": "d179a7ccd2"
- },
- {
-  "id": "t13",
-  "day": 6,
-  "label": "Music Production",
-  "start": "10:30",
-  "mins": 180,
-  "projectId": "music",
-  "kind": "project",
-  "sliderId": "98fe52e687"
- },
- {
-  "id": "t14",
-  "day": 0,
-  "label": "Sunday plan + progress",
-  "start": "17:00",
-  "mins": 45,
-  "projectId": null,
-  "kind": "ritual",
-  "sliderId": null
- },
- {
-  "id": "t15",
-  "day": 0,
-  "label": "Weekly routines",
-  "start": "15:00",
-  "mins": 60,
-  "projectId": "wellness",
-  "kind": "admin",
-  "sliderId": "408540ebe2"
- },
- {
-  "id": "t16",
-  "day": 6,
-  "label": "Anderson Block",
-  "start": "13:00",
-  "mins": 90,
-  "projectId": "professional",
-  "kind": "anderson",
-  "sliderId": "4620f197bc"
- }
-],
- "routines": [
-  {
-   "id": "r01",
-   "name": "Morning routine — dental, deodorant, sunscreen, skincare",
-   "period": "daily"
-  },
-  {
-   "id": "r02",
-   "name": "Night routine — dental, skincare, retainer, set out tomorrow",
-   "period": "daily"
-  },
-  {
-   "id": "r03",
-   "name": "Laundry",
-   "period": "weekly"
-  },
-  {
-   "id": "r04",
-   "name": "Trash & recycling",
-   "period": "weekly"
-  },
-  {
-   "id": "r05",
-   "name": "Clean the apartment",
-   "period": "weekly"
-  },
-  {
-   "id": "r06",
-   "name": "Fridge review before the shop",
-   "period": "weekly"
-  },
-  {
-   "id": "r07",
-   "name": "Water bottles",
-   "period": "weekly"
-  },
-  {
-   "id": "r08",
-   "name": "Personal grooming",
-   "period": "weekly"
-  },
-  {
-   "id": "r09",
-   "name": "Plan next week",
-   "period": "weekly"
-  },
-  {
-   "id": "r10",
-   "name": "Product re-ups & replenishment",
-   "period": "monthly"
-  },
-  {
-   "id": "r11",
-   "name": "Deeper clean",
-   "period": "monthly"
-  },
-  {
-   "id": "r12",
-   "name": "Bedding",
-   "period": "monthly"
-  },
-  {
-   "id": "r13",
-   "name": "Finance review (10 min)",
-   "period": "monthly"
-  },
-  {
-   "id": "r14",
-   "name": "Paper investing check-in",
-   "period": "monthly"
-  },
-  {
-   "id": "r15",
-   "name": "Book any health appointments",
-   "period": "monthly"
-  },
-  {
-   "id": "r16",
-   "name": "Declutter — physical",
-   "period": "biannual"
-  },
-  {
-   "id": "r17",
-   "name": "Clothing donations",
-   "period": "biannual"
-  },
-  {
-   "id": "r18",
-   "name": "Media inventory reconciliation",
-   "period": "biannual"
-  },
-  {
-   "id": "r19",
-   "name": "Digital files & photo backup",
-   "period": "biannual"
-  },
-  {
-   "id": "r20",
-   "name": "Password & account review",
-   "period": "biannual"
-  },
-  {
-   "id": "r21",
-   "name": "Personal archive backup",
-   "period": "biannual"
   }
  ],
  "mementos": [
   {
-   "id": "m21",
    "n": 21,
    "label": "End of Summer Quarter",
    "due": "2026-09-25"
   },
   {
-   "id": "m22",
    "n": 22,
    "label": "End of Fall Quarter",
    "due": "2026-12-18"
   },
   {
-   "id": "m23",
    "n": 23,
    "label": "End of Winter Quarter",
    "due": "2027-03-19"
   },
   {
-   "id": "m24",
    "n": 24,
    "label": "End of Spring Quarter",
    "due": "2027-06-11"
   },
   {
-   "id": "m25",
    "n": 25,
-   "label": "End of summer",
-   "due": "2027-09-10"
+   "label": "End of Summer 2027",
+   "due": "2027-09-24"
   },
   {
-   "id": "m26",
    "n": 26,
-   "label": "End of Fall Quarter",
+   "label": "End of Fall Quarter 2027",
    "due": "2027-12-17"
   },
   {
-   "id": "m27",
    "n": 27,
    "label": "Graduation",
    "due": "2028-05-31"
-  }
- ],
- "releases": [
-  {
-   "id": "rel1",
-   "title": "The Gentleman’s Night Sessions",
-   "date": "2026-10-17",
-   "note": "Public release"
-  },
-  {
-   "id": "rel2",
-   "title": "SWAGBOYS",
-   "date": "2026-10-31",
-   "note": "Public release"
-  },
-  {
-   "id": "rel3",
-   "title": "Beat pack for Otherside artists",
-   "date": "2026-11-14",
-   "note": "Private — relationship lane"
-  },
-  {
-   "id": "rel4",
-   "title": "Chicago Bounce",
-   "date": "2026-11-27",
-   "note": "Thanksgiving"
-  },
-  {
-   "id": "rel5",
-   "title": "Pine Boys album",
-   "date": "2026-12-19",
-   "note": "Public release"
   }
  ]
 };

@@ -96,9 +96,10 @@ var LISTS = [
   ["n90",  "ninety"],
   ["note", "notes"],
   ["prog", "progress"],
-  ["refl", "reflections"]
+  ["refl", "reflections"],
+  ["blk",  "blocks"]
 ];
-var PREFS = ["theme", "wwwMode"];
+var PREFS = ["theme", "wwwMode"];   /* dayWindow rides along as p:dayWindow */
 
 function flatten(S) {
   var f = {};
@@ -123,6 +124,8 @@ function flatten(S) {
   });
   Object.keys(S.weekPlans || {}).forEach(function (k) { f["wp:" + k] = { v: S.weekPlans[k], i: 0 }; });
   Object.keys(S.blockRoutines || {}).forEach(function (k) { f["br:" + k] = { v: S.blockRoutines[k], i: 0 }; });
+  Object.keys(S.flowOrder || {}).forEach(function (k) { f["fo:" + k] = { v: S.flowOrder[k], i: 0 }; });
+  f["p:dayWindow"] = { v: S.dayWindow, i: 0 };
   Object.keys(S.removed || {}).forEach(function (dk) {
     (S.removed[dk] || []).forEach(function (tid) { f["rm:" + dk + "|" + tid] = { v: 1, i: 0 }; });
   });
@@ -142,7 +145,7 @@ function unflatten(f, base) {
   LISTS.forEach(function (L) { S[L[1]] = []; });
   S.blockState = {}; S.routineLog = {}; S.weekPlans = {};
   S.blockRoutines = {}; S.removed = {}; S.extras = {};
-  S.checkins = {}; S.dismissed = {};
+  S.checkins = {}; S.dismissed = {}; S.flowOrder = {};
 
   var listOrder = {};
   LISTS.forEach(function (L) { listOrder[L[0]] = []; });
@@ -158,6 +161,7 @@ function unflatten(f, base) {
     if (p === "rl") { S.routineLog[rest] = e.v; return; }
     if (p === "wp") { S.weekPlans[rest] = e.v; return; }
     if (p === "br") { S.blockRoutines[rest] = e.v; return; }
+    if (p === "fo") { S.flowOrder[rest] = e.v; return; }
     if (p === "dm") { S.dismissed[rest] = e.v; return; }
 
     var bar = rest.indexOf("|");

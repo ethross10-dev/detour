@@ -10,10 +10,10 @@ function freshState() {
   var seed = window.DETOUR_SEED;
   return {
     version: 1,
-    schema: 3,
+    schema: 4,
     createdAt: new Date().toISOString(),
     theme: "auto",
-    wwwMode: "day",
+    wwwMode: "flow",
     progress: [],      /* one Sunday entry per week */
     reflections: [],   /* Reflect tab entries */
     checkins: {},      /* dateKey -> { blockKey: "yes"|"partly"|"no" } */
@@ -22,22 +22,22 @@ function freshState() {
     tombs: {},         /* record key -> deletion time */
     clock: 0,          /* logical clock, so device skew can't reorder edits */
     projects: clone(seed.projects),
-    sliders: clone(seed.sliders),
+    blocks: clone(seed.blocks),
+    pillars: clone(seed.pillars),
     milestones: clone(seed.milestones),
     tasks: clone(seed.tasks || []),
     blockRoutines: clone(seed.blockRoutines || {}),
     ninety: clone(seed.ninety),
-    later: clone(seed.later),
-    stopDoing: seed.stop,
     templates: clone(seed.blockTemplates),
     routines: clone(seed.routines),
     mementos: clone(seed.mementos),
-    releases: clone(seed.releases),
     removed: {},      // dateKey -> [templateId]
     extras: {},       // dateKey -> [block]
     blockState: {},   // dateKey -> { blockKey: {done, note} }
     routineLog: {},   // "routineId|periodKey" -> iso
     weekPlans: {},    // weekKey -> {planned, at, meals, workouts, focus}
+    flowOrder: {},    // dateKey -> [itemKey] — the order you dragged them into
+    dayWindow: { start: "07:00", end: "22:30" },
     notes: []         // {id, ts, text, projectId}
   };
 }
@@ -60,75 +60,57 @@ function load() {
    The device's localStorage copy is authoritative once it exists — editing
    seed.js only changes fresh installs. Every structural change therefore has
    to arrive here as well, or it never reaches the phone. */
-var TEMPLATE_SLIDERS = {
-  t01:"4620f197bc", t02:"4620f197bc", t03:"4620f197bc", t04:"4620f197bc", t05:"4620f197bc",
-  t06:"310350efa2", t07:"310350efa2", t08:"310350efa2",
-  t09:"ebdcefcb48",
-  t10:"d179a7ccd2", t12:"d179a7ccd2",
-  t11:"98fe52e687", t13:"98fe52e687",
-  t14:null,          t15:"408540ebe2"
-};
 function migrate() {
   var seed = window.DETOUR_SEED;
   if (!S.schema) S.schema = 1;
 
-  /* 1 → 2 : WWW. Tasks under sliders, per-block step routines, slider on blocks. */
-  if (S.schema < 2) {
-    if (!S.tasks) S.tasks = clone(seed.tasks || []);
-    if (!S.blockRoutines) S.blockRoutines = clone(seed.blockRoutines || {});
-    (S.templates || []).forEach(function (t) {
-      if (t.sliderId === undefined) {
-        t.sliderId = TEMPLATE_SLIDERS.hasOwnProperty(t.id) ? TEMPLATE_SLIDERS[t.id] : null;
-      }
+  /* → 4 : the LA-era rewrite.
+     Sliders become Blocks, projects gain a Pillar, and every goal is
+     replaced by the finalised set. What you have DONE is history and is
+     kept: block ticks, routine ticks, Sunday entries, reflections, notes,
+     check-ins, and any one-off items you put on a day yourself. */
+  if (S.schema < 4) {
+    var validBlocks = {};
+    (seed.blocks || []).forEach(function (b) { validBlocks[b.id] = 1; });
+
+    S.pillars   = clone(seed.pillars);
+    S.projects  = clone(seed.projects);
+    S.blocks    = clone(seed.blocks);
+    S.milestones= clone(seed.milestones);
+    S.tasks     = clone(seed.tasks || []);
+    S.templates = clone(seed.blockTemplates);
+    S.routines  = clone(seed.routines);
+    S.blockRoutines = clone(seed.blockRoutines || {});
+    S.ninety    = clone(seed.ninety);
+    S.mementos  = clone(seed.mementos);
+
+    /* one-off items you added yourself survive, but a reference to a block
+       that no longer exists would dangle — clear those rather than orphan */
+    Object.keys(S.extras || {}).forEach(function (dk) {
+      (S.extras[dk] || []).forEach(function (x) {
+        if (x.blockId === undefined && x.sliderId !== undefined) { x.blockId = x.sliderId; delete x.sliderId; }
+        if (!x.blockId || !validBlocks[x.blockId]) x.blockId = null;
+        if (x.pin === undefined) x.pin = false;
+      });
     });
-    if (!S.wwwMode) S.wwwMode = "day";
-    S.schema = 2;
+
+    delete S.sliders; delete S.later; delete S.stopDoing; delete S.releases;
+    if (!S.flowOrder) S.flowOrder = {};
+    if (!S.dayWindow) S.dayWindow = { start: "07:00", end: "22:30" };
+    S.wwwMode = "flow";
+    S.schema = 4;
     save();
   }
 
-  /* 2 → 3 : the Professional Project rewrite, and the five-tab shape.
-     Ethan replaced all twelve Professional milestones with his own eleven.
-     Dated sub-work from the retired ones survives as tasks so no real
-     deadline is lost — the September Hillel budget above all. */
-  if (S.schema < 3) {
-    var newPro = clone((seed.milestones || []).filter(function (m) { return m.projectId === "professional"; }));
-    S.milestones = (S.milestones || []).filter(function (m) { return m.projectId !== "professional"; }).concat(newPro);
-
-    (seed.tasks || []).forEach(function (t) {
-      if (!S.tasks.some(function (x) { return x.id === t.id; })) S.tasks.push(clone(t));
-    });
-
-    /* Anderson blocks move to after class; one is added at the weekend.
-       Only shift a block still sitting at the original 8am, so an edit
-       you already made is never overwritten. */
-    (S.templates || []).forEach(function (t) {
-      if (t.kind === "anderson" && t.start === "08:00") t.start = "16:30";
-      if (t.id === "t14" && t.label === "Sunday plan") { t.label = "Sunday plan + progress"; t.mins = 45; }
-    });
-    if (!S.templates.some(function (t) { return t.id === "t16"; })) {
-      S.templates.push({ id: "t16", day: 6, label: "Anderson Block", start: "13:00", mins: 90,
-                         projectId: "professional", kind: "anderson", sliderId: "4620f197bc" });
-    }
-    S.blockRoutines["4620f197bc"] = clone(seed.blockRoutines["4620f197bc"]);
-
-    if (!S.progress) S.progress = [];
-    if (!S.reflections) S.reflections = [];
-    if (!S.checkins) S.checkins = {};
-    if (!S.dismissed) S.dismissed = {};
-    S.schema = 3;
-    save();
-  }
-
-  if (!S.tasks) S.tasks = [];
-  if (!S.blockRoutines) S.blockRoutines = {};
-  if (!S.wwwMode) S.wwwMode = "day";
-  if (!S.stamps) S.stamps = {};
-  if (!S.tombs) S.tombs = {};
+  ["tasks","milestones","routines","progress","reflections","notes","ninety"].forEach(function (k) {
+    if (!Array.isArray(S[k])) S[k] = [];
+  });
+  ["blockRoutines","stamps","tombs","checkins","dismissed","flowOrder"].forEach(function (k) {
+    if (!S[k]) S[k] = {};
+  });
+  if (!S.dayWindow) S.dayWindow = { start: "07:00", end: "22:30" };
+  if (!S.wwwMode) S.wwwMode = "flow";
   if (!S.clock) S.clock = 0;
-  if (!S.progress) S.progress = [];
-  if (!S.reflections) S.reflections = [];
-  if (!S.checkins) S.checkins = {};
-  if (!S.dismissed) S.dismissed = {};
 }
 var saveTimer = null;
 function save() {
@@ -173,8 +155,9 @@ function blocksFor(date) {
   var list = S.templates
     .filter(function (t) { return t.day === dow && removed.indexOf(t.id) < 0 && !isPaused(t, date); })
     .map(function (t) {
-      return { key: t.id, templateId: t.id, projectId: t.projectId, sliderId: t.sliderId || null,
-               label: t.label, start: t.start, mins: t.mins, kind: t.kind, fromTemplate: true };
+      return { key: t.id, templateId: t.id, projectId: t.projectId, blockId: t.blockId || null,
+               label: t.label, start: t.start, mins: t.mins, kind: t.kind,
+               pin: !!t.pin, fromTemplate: true };
     });
   (S.extras[k] || []).forEach(function (b) { list.push(Object.assign({ fromTemplate: false }, b)); });
   list.sort(function (a, b) { return hmToMins(a.start) - hmToMins(b.start); });
@@ -196,20 +179,19 @@ function setBlockState(dateKey, blockKey, patch) {
 function project(id) { for (var i=0;i<S.projects.length;i++) if (S.projects[i].id===id) return S.projects[i]; return null; }
 function projColor(id) { var p = project(id); return p ? p.color : "var(--line-strong)"; }
 
-/* ============================ sliders ============================ */
-function slider(id) { for (var i=0;i<S.sliders.length;i++) if (S.sliders[i].id===id) return S.sliders[i]; return null; }
-function slidersFor(pid) { return S.sliders.filter(function (s) { return s.projectId === pid; }); }
-function sliderName(id) { var s = slider(id); return s ? s.name : ""; }
+/* ============================ block definitions ============================ */
+function blockDef(id) { for (var i=0;i<S.blocks.length;i++) if (S.blocks[i].id===id) return S.blocks[i]; return null; } //[i]; return null; }
+function blockDefsFor(pid) { return S.blocks.filter(function (s) { return s.projectId === pid; }); }
+function blockDefName(id) { var s = blockDef(id); return s ? s.name : ""; }
 /* "Creative Identity (IO)" → "Creative Identity" — the tag is shown as its own pill */
-function sliderShort(id) { return sliderName(id).replace(/\s*\((IO|PD|WWO|SC)\)\s*$/, "").trim(); }
-function sliderTag(id) { var m = /\((IO|PD|WWO|SC)\)\s*$/.exec(sliderName(id)); return m ? m[1] : ""; }
+function blockLabel(id) { return blockDefName(id); }
 
 /* ============================ tasks ============================ */
-/* Tasks are the small, checkable things under a slider. Milestones are the
-   big ones. A block on the WWW calendar surfaces its slider's open tasks. */
-function tasksFor(sliderId, includeDone) {
+/* Tasks are the small, checkable things under a block. Milestones are the
+   big ones. A scheduled item surfaces its block's open tasks. */
+function tasksFor(blockId, includeDone) {
   var list = S.tasks.filter(function (t) {
-    return t.sliderId === sliderId && (includeDone || !t.done);
+    return t.blockId === blockId && (includeDone || !t.done);
   });
   list.sort(function (a, b) {
     if (a.done !== b.done) return a.done ? 1 : -1;
@@ -219,8 +201,8 @@ function tasksFor(sliderId, includeDone) {
   });
   return list;
 }
-function openTaskCount(sliderId) {
-  return S.tasks.filter(function (t) { return t.sliderId === sliderId && !t.done; }).length;
+function openTaskCount(blockId) {
+  return S.tasks.filter(function (t) { return t.blockId === blockId && !t.done; }).length;
 }
 function tasksDueOn(dateKey) {
   return S.tasks.filter(function (t) { return !t.done && t.due === dateKey; });
@@ -231,10 +213,10 @@ function overdueTasks() {
                 .sort(function (a, b) { return a.due < b.due ? -1 : 1; });
 }
 function addTask(o) {
-  var t = { id: uid(), sliderId: o.sliderId || null, projectId: o.projectId || null,
+  var t = { id: uid(), blockId: o.blockId || null, projectId: o.projectId || null,
             title: o.title, due: o.due || null, note: o.note || "", done: false, doneAt: null,
             createdAt: new Date().toISOString() };
-  if (t.sliderId && !t.projectId) { var s = slider(t.sliderId); if (s) t.projectId = s.projectId; }
+  if (t.blockId && !t.projectId) { var s = blockDef(t.blockId); if (s) t.projectId = s.projectId; }
   S.tasks.push(t); save();
   return t;
 }
@@ -245,8 +227,8 @@ function toggleTask(t) {
 }
 /* what to work on inside this block: next open task, else next open milestone */
 function blockFocus(b) {
-  if (b.sliderId) {
-    var t = tasksFor(b.sliderId)[0];
+  if (b.blockId) {
+    var t = tasksFor(b.blockId)[0];
     if (t) return { kind: "task", title: t.title, due: t.due, obj: t };
   }
   if (b.projectId) {
@@ -258,8 +240,8 @@ function blockFocus(b) {
 
 /* ============================ block step routines ============================ */
 /* The repeating checklist inside a block — "the whole routine" — keyed by
-   slider so every Anderson Block gets the same steps, ticked per date. */
-function routineKeyFor(b) { return b.sliderId || ("kind:" + (b.kind || "project")); }
+   block so every Anderson Block gets the same steps, ticked per date. */
+function routineKeyFor(b) { return b.blockId || ("kind:" + (b.kind || "project")); }
 function stepsFor(b) { return S.blockRoutines[routineKeyFor(b)] || []; }
 function stepDone(dateKey, blockKey, stepId) {
   var st = blockState(dateKey, blockKey).steps || {};
@@ -309,6 +291,7 @@ function dailyStreak(r) {
 function routinesDueToday() {
   var d = today(), out = [];
   S.routines.forEach(function (r) {
+    if (r.days && r.days.indexOf(d.getDay()) < 0) return;   /* e.g. floss on M/W/Th */
     if (r.period === "daily") out.push(r);
     else if (r.period === "weekly" && d.getDay() === 0) out.push(r);
     else if (r.period === "monthly" && d.getDate() <= 3) out.push(r);
@@ -318,6 +301,195 @@ function routinesDueToday() {
 }
 
 /* ============================ milestones ============================ */
+/* ============================ the flow engine ============================
+   The bullet list kept flexibility because nothing had a start time — only
+   an ORDER. The grid gave "when do I move on" but paid for it with
+   brittleness: overrun once and the whole day is a lie.
+
+   So: items carry a DURATION and a POSITION, not a start time. Only real
+   appointments are pinned to the clock. Everything else is projected from
+   wherever you actually are right now, which means running forty minutes
+   over just slides the rest down. Nothing breaks; the overflow line moves
+   up, and you decide what falls off the end. */
+
+function dayStartMins() { return hmToMins((S.dayWindow && S.dayWindow.start) || "07:00"); }
+function dayEndMins()   { return hmToMins((S.dayWindow && S.dayWindow.end)   || "22:30"); }
+
+/* the order you put things in, falling back to preferred time */
+function orderedItems(date) {
+  var k = dkey(date), items = blocksFor(date);
+  var order = S.flowOrder[k] || [];
+  items.sort(function (a, b) {
+    var ia = order.indexOf(a.key), ib = order.indexOf(b.key);
+    if (ia >= 0 && ib >= 0) return ia - ib;
+    if (ia >= 0) return -1;
+    if (ib >= 0) return 1;
+    return hmToMins(a.start) - hmToMins(b.start);
+  });
+  return items;
+}
+
+function setOrder(date, items) {
+  S.flowOrder[dkey(date)] = items.map(function (b) { return b.key; });
+  save();
+}
+
+function moveItem(date, key, dir) {
+  var items = orderedItems(date);
+  var i = items.map(function (b) { return b.key; }).indexOf(key);
+  var j = i + dir;
+  if (i < 0 || j < 0 || j >= items.length) return;
+  var tmp = items[i]; items[i] = items[j]; items[j] = tmp;
+  setOrder(date, items);
+}
+
+/* Walk the list once, placing pinned items at their clock time and letting
+   everything else flow into the gaps between them. */
+function projectDay(date) {
+  var k = dkey(date);
+  var items = orderedItems(date);
+  var isToday = sameDay(date, today());
+  var cursor = dayStartMins();
+  if (isToday) cursor = Math.max(cursor, nowMins());
+
+  var pins = items.filter(function (b) { return b.pin; })
+    .map(function (b) { return { s: hmToMins(b.start), e: hmToMins(b.start) + b.mins }; })
+    .sort(function (a, b) { return a.s - b.s; });
+
+  var endBy = dayEndMins(), out = [];
+
+  var STALE_AFTER = 120;   /* minutes past its natural slot before we stop pretending */
+
+  items.forEach(function (b) {
+    var st = blockState(k, b.key);
+    if (st.done || st.skipped) {
+      out.push({ b: b, done: !!st.done, skipped: !!st.skipped, start: null, end: null, pinned: !!b.pin });
+      return;
+    }
+    /* A morning routine still unticked at 4pm did not move to 4pm — it was
+       missed. Say so, and leave the evening to the work that is still live. */
+    if (isToday && !b.pin && hmToMins(b.start) + b.mins + STALE_AFTER < nowMins()) {
+      out.push({ b: b, done: false, skipped: false, stale: true,
+                 start: null, end: null, pinned: false, was: hmToMins(b.start) });
+      return;
+    }
+    var start, end;
+    if (b.pin) {
+      start = hmToMins(b.start);
+      end = start + b.mins;
+      cursor = Math.max(cursor, end);
+    } else {
+      start = cursor;
+      /* don't run over an appointment — hop past any pin we'd collide with */
+      for (var g = 0; g < pins.length; g++) {
+        if (start < pins[g].e && start + b.mins > pins[g].s) start = pins[g].e;
+      }
+      end = start + b.mins;
+      cursor = end;
+    }
+    out.push({ b: b, done: false, skipped: false, start: start, end: end,
+               pinned: !!b.pin, overflow: end > endBy });
+  });
+  return out;
+}
+
+/* push an unfinished item to another day, keeping its block and duration */
+function pushItem(b, fromDate, toDate) {
+  var fk = dkey(fromDate), tk = dkey(toDate);
+  if (b.fromTemplate) {
+    if (!S.removed[fk]) S.removed[fk] = [];
+    if (S.removed[fk].indexOf(b.templateId) < 0) S.removed[fk].push(b.templateId);
+  } else {
+    S.extras[fk] = (S.extras[fk] || []).filter(function (x) { return x.key !== b.key; });
+  }
+  if (!S.extras[tk]) S.extras[tk] = [];
+  S.extras[tk].push({ key: uid(), projectId: b.projectId, blockId: b.blockId, label: b.label,
+                      start: b.start, mins: b.mins, kind: b.kind, pin: false });
+  save();
+}
+
+/* ============================ pillars ============================
+   "Progress in all three pillars on a weekly basis" is the stated metric
+   of success, so the app measures exactly that and nothing cleverer. */
+function pillarOf(projectId) {
+  var p = project(projectId);
+  return p ? p.pillar : null;
+}
+function pillarWeek(weekStart) {
+  var out = {};
+  (S.pillars || []).forEach(function (pl) { out[pl.id] = { done: 0, planned: 0, closed: 0 }; });
+
+  /* routines are upkeep, not Detour progress — they would drown everything else */
+  for (var i = 0; i < 7; i++) {
+    var d = addDays(weekStart, i), k = dkey(d);
+    blocksFor(d).forEach(function (b) {
+      if (b.kind === "routine" || b.kind === "ritual") return;
+      var pid = pillarOf(b.projectId);
+      if (!pid || !out[pid]) return;
+      out[pid].planned++;
+      if (blockState(k, b.key).done) out[pid].done++;
+    });
+  }
+
+  /* Finances and Memoir carry no recurring blocks by design, so closing a
+     milestone or a task has to count as progress or Preservation could never
+     register a week at all. */
+  var from = weekStart.toISOString(), to = addDays(weekStart, 7).toISOString();
+  function credit(x) {
+    if (!x.done || !x.doneAt || x.doneAt < from || x.doneAt >= to) return;
+    var pid = pillarOf(x.projectId);
+    if (pid && out[pid]) out[pid].closed++;
+  }
+  S.milestones.forEach(credit);
+  S.tasks.forEach(credit);
+
+  (S.pillars || []).forEach(function (pl) {
+    var o = out[pl.id];
+    o.touched = (o.done + o.closed) > 0;
+  });
+  return out;
+}
+function pillarStrip(weekStart) {
+  var stats = pillarWeek(weekStart);
+  var wrap = h("div", "pillars");
+  (S.pillars || []).forEach(function (pl) {
+    var st = stats[pl.id] || { done: 0, planned: 0, closed: 0, touched: false };
+    var cell = h("div", "pillar" + (st.touched ? " hit" : ""));
+    cell.style.setProperty("--pc", pl.color);
+    cell.appendChild(h("div", "pn", esc(pl.name)));
+    var bar = h("div", "pbar");
+    var fill = h("i");
+    fill.style.width = (st.planned ? Math.min(100, st.done / st.planned * 100)
+                                   : (st.closed ? 100 : 0)) + "%";
+    bar.appendChild(fill);
+    cell.appendChild(bar);
+    cell.appendChild(h("div", "pv", st.planned ? st.done + "/" + st.planned +
+      (st.closed ? " +" + st.closed : "") : (st.closed ? st.closed + " closed" : "—")));
+    on(cell, "click", function () { showPillar(pl, st); });
+    wrap.appendChild(cell);
+  });
+  return wrap;
+}
+function showPillar(pl, st) {
+  openSheet(pl.name, function (body) {
+    body.appendChild(h("div", "eyebrow", pl.tag));
+    body.appendChild(h("div", "muted", esc(pl.blurb)));
+    body.appendChild(h("div", "h-md", st.planned
+      ? st.done + " of " + st.planned + " blocks kept this week"
+      : "No recurring blocks in this pillar"));
+    if (st.closed) body.appendChild(h("div", "dim", st.closed + " milestone" + (st.closed === 1 ? "" : "s") + " or task" + (st.closed === 1 ? "" : "s") + " closed this week."));
+    if (!st.touched) body.appendChild(h("div", "dim", "Nothing here yet this week. The metric is progress in all three, every week — a closed milestone counts as much as a kept block."));
+    S.projects.filter(function (p) { return p.pillar === pl.id; }).forEach(function (p) {
+      var openM = S.milestones.filter(function (m) { return m.projectId === p.id && !m.done; }).length;
+      var c = h("div", "card"); c.style.cursor = "pointer";
+      c.appendChild(h("div", "h-md", esc(p.name)));
+      c.appendChild(h("div", "dim", openM + " milestone" + (openM === 1 ? "" : "s") + " open · " + esc(p.priority)));
+      on(c, "click", function () { closeSheet(); showProject(p); });
+      body.appendChild(c);
+    });
+  });
+}
+
 /* ============================ the 3-2-1 rule ============================
    Ethan's own timeline policy, made mechanical:
      3 days out — started (over the previous weekend)
@@ -419,19 +591,20 @@ function nowHero(d) {
   var doneCount = blocks.filter(function (b) { return blockState(k, b.key).done; }).length;
   var nm = nowMins();
 
-  var live = null, next = null;
-  blocks.forEach(function (b) {
-    var s = hmToMins(b.start), e = s + b.mins;
-    if (nm >= s && nm < e && !blockState(k, b.key).done) live = live || b;
-    if (nm < s && !blockState(k, b.key).done) next = next || b;
+  /* read the projection, so the hero and the flow list never disagree */
+  var live = null, next = null, nextAt = null;
+  projectDay(d).forEach(function (r) {
+    if (r.done || r.skipped || r.stale || r.start === null) return;
+    if (nm >= r.start && nm < r.end) { live = live || r.b; }
+    else if (nm < r.start && !next) { next = r.b; nextAt = r.start; }
   });
 
   var hero = h("div", "now-hero");
   if (live || next) {
     var b = live || next;
-    hero.appendChild(h("div", "lab", live ? "Right now" : "Up next · " + minsToLabel(hmToMins(b.start))));
+    hero.appendChild(h("div", "lab", live ? "Right now" : "Up next · " + minsToLabel(nextAt)));
     hero.appendChild(h("div", "big", esc(b.label)));
-    if (b.sliderId) hero.appendChild(h("div", "sub", esc(sliderShort(b.sliderId))));
+    if (b.blockId && blockLabel(b.blockId) !== b.label) hero.appendChild(h("div", "sub", esc(blockLabel(b.blockId))));
     var fo = blockFocus(b);
     if (fo) hero.appendChild(h("div", "sub", "→ " + esc(fo.title)));
     else if (b.kind === "ritual") hero.appendChild(h("div", "sub", "The whole week gets decided here."));
@@ -486,10 +659,10 @@ function blockRow(b, date) {
   var body = h("div", "b");
   body.appendChild(h("div", "n", esc(b.label)));
   var meta = [];
-  if (b.sliderId) meta.push(sliderShort(b.sliderId));
+  if (b.blockId) meta.push(blockLabel(b.blockId));
   else if (b.projectId) { var p = project(b.projectId); if (p) meta.push(p.name); }
-  if (b.sliderId) {
-    var n = openTaskCount(b.sliderId);
+  if (b.blockId) {
+    var n = openTaskCount(b.blockId);
     if (n) meta.push(n + " task" + (n === 1 ? "" : "s"));
   }
   if (st.note) meta.push(st.note);
@@ -517,7 +690,9 @@ function routineRow(r) {
   chk.innerHTML = done ? "&#10003;" : "";
   on(chk, "click", function () { toggleRoutine(r); render(); });
   row.appendChild(chk);
-  row.appendChild(h("div", "n", esc(r.name)));
+  var nm = h("div", "n", esc(r.name));
+  if (r.note) nm.appendChild(h("div", "dim", esc(r.note)));
+  row.appendChild(nm);
   if (r.period === "daily") {
     var st = dailyStreak(r);
     if (st > 1) row.appendChild(h("div", "streak", st + "d"));
@@ -547,6 +722,7 @@ function milestoneRow(m) {
   var p = project(m.projectId);
   meta.appendChild(h("span", "dim", esc(p ? p.name : "")));
   if (m.build) meta.appendChild(h("span", "pill acc", "build"));
+  if (m.tbd) meta.appendChild(h("span", "pill", "TBD"));
   meta.appendChild(h("span", "pill " + st.cls, st.label));
   body.appendChild(meta);
   on(body, "click", function () { showMilestone(m); });
@@ -563,7 +739,7 @@ function showMilestone(m) {
     g.appendChild(h("div", "eyebrow", "Details"));
     g.appendChild(h("div", "muted",
       "<b>Project</b> " + esc(p ? p.name : "—") + "<br>" +
-      "<b>Slider</b> " + esc(m.slider || "—") + "<br>" +
+      "<b>Block</b> " + esc(m.blockId ? blockDefName(m.blockId) : "—") + "<br>" +
       "<b>Window</b> " + esc(m.term) + "<br>" +
       "<b>Target</b> " + (m.due ? esc(m.due) : "ongoing")));
     body.appendChild(g);
@@ -584,8 +760,8 @@ function showMilestone(m) {
 }
 
 /* ---------------- WWW · Working While Working ---------------- */
-/* The calendar. Every block carries a project and a slider; tapping the
-   slider opens that slider's task list. Outlook's shape, Detour's contents. */
+/* The calendar. Every item carries a project and a block; tapping the block
+   name opens that block's task list. */
 
 function wwwDays() {
   if (S.wwwMode === "week") {
@@ -599,6 +775,7 @@ function wwwDays() {
 function viewWWW(root) {
   var days = wwwDays();
   var isWeek = S.wwwMode === "week";
+  var isFlow = S.wwwMode === "flow";
   document.getElementById("tbsub").textContent = isWeek
     ? "WWW · week of " + fmtDate(days[0])
     : "WWW · " + fmtLong(wwwCursor);
@@ -608,7 +785,7 @@ function viewWWW(root) {
   /* --- controls --- */
   var bar = h("div", "wwwbar");
   var seg = h("div", "seg");
-  [["day", "Day"], ["week", "Week"]].forEach(function (o) {
+  [["flow", "Flow"], ["day", "Grid"], ["week", "Week"]].forEach(function (o) {
     var b = h("button", null, o[1]);
     b.setAttribute("aria-pressed", S.wwwMode === o[0] ? "true" : "false");
     on(b, "click", function () { S.wwwMode = o[0]; save(); render(); });
@@ -627,7 +804,10 @@ function viewWWW(root) {
   bar.appendChild(prev); bar.appendChild(nowb); bar.appendChild(next);
   wrap.appendChild(bar);
 
-  /* --- what's running right now, on today's day view only --- */
+  /* --- the week's pillar balance: the stated metric of success --- */
+  wrap.appendChild(pillarStrip(weekStartOf(wwwCursor)));
+
+  /* --- what's running right now, on today only --- */
   if (!isWeek && sameDay(wwwCursor, today())) wrap.appendChild(nowHero(wwwCursor));
 
   /* --- overdue banner: tasks with a date that has passed --- */
@@ -640,7 +820,8 @@ function viewWWW(root) {
     wrap.appendChild(ob);
   }
 
-  wrap.appendChild(buildCalendar(days));
+  if (isFlow) wrap.appendChild(buildFlow(wwwCursor));
+  else wrap.appendChild(buildCalendar(days));
 
   /* --- load summary, week mode only --- */
   if (isWeek) {
@@ -648,6 +829,7 @@ function viewWWW(root) {
     days.forEach(function (d) {
       var k = dkey(d);
       blocksFor(d).forEach(function (b) {
+        if (b.kind === "routine") return;      /* routines are upkeep, not Detour load */
         mins += b.mins; count++;
         if (blockState(k, b.key).done) done++;
       });
@@ -676,6 +858,160 @@ function viewWWW(root) {
   }
 
   root.appendChild(wrap);
+}
+
+/* ---------------- the flow list ---------------- */
+function buildFlow(date) {
+  var k = dkey(date), wrap = h("div", "stack g10");
+  var all = projectDay(date);
+  var isToday = sameDay(date, today());
+  var stale = all.filter(function (r) { return r.stale; });
+  var rows = all.filter(function (r) { return !r.stale; });
+
+  var head = h("div", "flowhead");
+  head.appendChild(h("span", "eyebrow", isToday
+    ? "flowing from " + minsToLabel(Math.max(dayStartMins(), nowMins()))
+    : "from " + minsToLabel(dayStartMins())));
+  var win = h("button", "btn ghost sm");
+  win.textContent = "ends by " + minsToLabel(dayEndMins());
+  on(win, "click", editDayWindow);
+  head.appendChild(win);
+  wrap.appendChild(head);
+
+  if (stale.length) {
+    var sh = h("div", "sec");
+    sh.appendChild(sechead("Missed earlier", stale.length + ""));
+    sh.appendChild(h("div", "dim", "Their slot has passed. Do one now, push it, or skip it — they are not holding up the rest of the day."));
+    stale.forEach(function (r, i) { sh.appendChild(flowRow(r, date, -1, 0)); });
+    wrap.appendChild(sh);
+  }
+  if (!rows.length && !stale.length) {
+    wrap.appendChild(h("div", "empty", "Nothing on today.<br>An unscheduled day is not a free day — it is the one that never ends."));
+  }
+
+  var shownOverflow = false;
+  rows.forEach(function (r, idx) {
+    if (r.overflow && !shownOverflow) {
+      shownOverflow = true;
+      var div = h("div", "overflowline");
+      div.appendChild(h("span", null, "won't fit before " + minsToLabel(dayEndMins())));
+      wrap.appendChild(div);
+    }
+    wrap.appendChild(flowRow(r, date, idx, rows.length));
+  });
+
+  var add = h("button", "btn ghost wide");
+  add.textContent = "+ Add to " + (isToday ? "today" : fmtDate(date));
+  on(add, "click", function () { editBlock(null, date); });
+  wrap.appendChild(add);
+  return wrap;
+}
+
+function flowRow(r, date, idx, total) {
+  var b = r.b, k = dkey(date), st = blockState(k, b.key);
+  var row = h("div", "fitem" + (r.done ? " done" : "") + (r.skipped ? " skipped" : "") +
+                     (r.overflow ? " over" : "") + (r.pinned ? " pinned" : "") + (r.stale ? " stale" : ""));
+  if (b.projectId) row.style.setProperty("--pc", projColor(b.projectId));
+
+  var chk = h("button", "chk"); chk.type = "button";
+  chk.setAttribute("aria-pressed", r.done ? "true" : "false");
+  chk.setAttribute("aria-label", "Mark done");
+  chk.innerHTML = r.done ? "&#10003;" : "";
+  on(chk, "click", function (e) {
+    e.stopPropagation();
+    setBlockState(k, b.key, { done: !st.done, skipped: false });
+    render();
+  });
+  row.appendChild(chk);
+
+  var body = h("div", "fb");
+  body.appendChild(h("div", "ft", esc(b.label)));
+
+  var meta = h("div", "fm");
+  if (r.done) meta.appendChild(h("span", "dim", "done"));
+  else if (r.skipped) meta.appendChild(h("span", "dim", "skipped"));
+  else if (r.stale) meta.appendChild(h("span", "pill warn", "missed · " + minsToLabel(r.was)));
+  else if (r.pinned) meta.appendChild(h("span", "pill acc", minsToLabel(r.start) + " pinned"));
+  else meta.appendChild(h("span", "when", "≈ " + minsToLabel(r.start) + "–" + minsToLabel(r.end)));
+  meta.appendChild(h("span", "dim mono", b.mins >= 60 ? (b.mins / 60) + "h" : b.mins + "m"));
+  if (b.blockId && blockLabel(b.blockId) !== b.label) {
+    var n = openTaskCount(b.blockId);
+    var bl = h("button", "fblock");
+    bl.textContent = blockLabel(b.blockId) + (n ? " (" + n + ")" : "");
+    on(bl, "click", function (e) { e.stopPropagation(); showBlockTasks(b.blockId, b, date); });
+    meta.appendChild(bl);
+  }
+  body.appendChild(meta);
+  on(body, "click", function () { showBlock(b, date); });
+  row.appendChild(body);
+
+  var acts = h("div", "facts");
+  var up = h("button", "iconbtn xs"); up.textContent = "↑"; up.setAttribute("aria-label", "Move up");
+  on(up, "click", function (e) { e.stopPropagation(); moveItem(date, b.key, -1); render(); });
+  var dn = h("button", "iconbtn xs"); dn.textContent = "↓"; dn.setAttribute("aria-label", "Move down");
+  on(dn, "click", function (e) { e.stopPropagation(); moveItem(date, b.key, 1); render(); });
+  if (idx <= 0) up.disabled = true;
+  if (idx < 0 || idx === total - 1) dn.disabled = true;
+  acts.appendChild(up); acts.appendChild(dn);
+  var more = h("button", "iconbtn xs"); more.textContent = "⋯"; more.setAttribute("aria-label", "More");
+  on(more, "click", function (e) { e.stopPropagation(); itemMenu(b, date); });
+  acts.appendChild(more);
+  row.appendChild(acts);
+  return row;
+}
+
+function itemMenu(b, date) {
+  var k = dkey(date);
+  openSheet(b.label, function (body) {
+    var st = blockState(k, b.key);
+    body.appendChild(h("div", "dim", fmtLong(date) + " · " + (b.mins >= 60 ? (b.mins / 60) + "h" : b.mins + "m") +
+      (b.pin ? " · pinned to " + minsToLabel(hmToMins(b.start)) : " · flows")));
+
+    body.appendChild(menuBtn(b.pin ? "Unpin — let it flow" : "Pin to " + minsToLabel(hmToMins(b.start)),
+      b.pin ? "It will slide with the rest of the day again." : "Only do this for real appointments.",
+      function () {
+        if (b.fromTemplate) {
+          var t = S.templates.filter(function (x) { return x.id === b.templateId; })[0];
+          if (t) t.pin = !b.pin;
+        } else {
+          S.extras[k] = (S.extras[k] || []).map(function (x) {
+            return x.key === b.key ? Object.assign(x, { pin: !b.pin }) : x;
+          });
+        }
+        save(); closeSheet(); render();
+      }));
+
+    body.appendChild(menuBtn("Push to tomorrow", "Keeps the block and the duration, moves the day.", function () {
+      pushItem(b, date, addDays(date, 1)); closeSheet(); render(); toast("Moved to tomorrow");
+    }));
+    body.appendChild(menuBtn("Push to the weekend", "Saturday.", function () {
+      var d = addDays(date, 1); while (d.getDay() !== 6) d = addDays(d, 1);
+      pushItem(b, date, d); closeSheet(); render(); toast("Moved to " + fmtDate(d));
+    }));
+    body.appendChild(menuBtn(st.skipped ? "Un-skip" : "Skip today", "Not done, not carried. No guilt attached.", function () {
+      setBlockState(k, b.key, { skipped: !st.skipped, done: false });
+      closeSheet(); render();
+    }));
+    body.appendChild(menuBtn("Edit", "Label, block, duration.", function () { closeSheet(); editBlock(b, date); }));
+    body.appendChild(menuBtn("Open block", "Steps and tasks.", function () { closeSheet(); showBlock(b, date); }));
+  });
+}
+
+function editDayWindow() {
+  openSheet("Day window", function (body) {
+    body.appendChild(h("div", "muted", "Flow projects from the first time and warns you at the second. Nothing is enforced — the line just tells you what will not fit."));
+    var a = h("input"); a.type = "time"; a.value = (S.dayWindow && S.dayWindow.start) || "07:00";
+    var b2 = h("input"); b2.type = "time"; b2.value = (S.dayWindow && S.dayWindow.end) || "22:30";
+    var l1 = h("label", "fld"); l1.appendChild(h("span", null, "Day starts")); l1.appendChild(a);
+    var l2 = h("label", "fld"); l2.appendChild(h("span", null, "Ends by")); l2.appendChild(b2);
+    body.appendChild(l1); body.appendChild(l2);
+    var sv = h("button", "btn wide"); sv.textContent = "Save";
+    on(sv, "click", function () {
+      S.dayWindow = { start: a.value || "07:00", end: b2.value || "22:30" };
+      save(); closeSheet(); render();
+    });
+    body.appendChild(sv);
+  });
 }
 
 /* lane packing so overlapping blocks sit side by side, like Outlook */
@@ -828,7 +1164,7 @@ function calEvent(ev, date, k, lo, ppm, isWeek) {
   el.style.top = ((s - lo) * ppm) + "px";
   var px = Math.max(24, b.mins * ppm);
   el.style.height = px + "px";
-  if (px < 40) el.classList.add("tiny");   /* one clamped line, no slider link */
+  if (px < 40) el.classList.add("tiny");   /* one clamped line, no block link */
   var w = 100 / ev.lanes;
   el.style.left = "calc(" + (ev.lane * w) + "% + 2px)";
   el.style.width = "calc(" + w + "% - 4px)";
@@ -837,11 +1173,11 @@ function calEvent(ev, date, k, lo, ppm, isWeek) {
   el.appendChild(h("div", "cl", esc(b.label)));
   if (!isWeek) el.appendChild(h("div", "ct", minsToLabel(s) + " · " + (b.mins >= 60 ? (b.mins / 60) + "h" : b.mins + "m")));
 
-  if (b.sliderId) {
-    var n = openTaskCount(b.sliderId);
+  if (b.blockId) {
+    var n = openTaskCount(b.blockId);
     var sl = h("button", "cs");
-    sl.textContent = sliderShort(b.sliderId) + (n ? " (" + n + ")" : "");
-    on(sl, "click", function (e) { e.stopPropagation(); showSliderTasks(b.sliderId, b, date); });
+    sl.textContent = blockLabel(b.blockId) + (n ? " (" + n + ")" : "");
+    on(sl, "click", function (e) { e.stopPropagation(); showBlockTasks(b.blockId, b, date); });
     el.appendChild(sl);
   }
 
@@ -864,15 +1200,14 @@ function showBlock(b, date) {
     head.appendChild(row);
     head.appendChild(h("div", "dim", fmtLong(date) + " · " + minsToLabel(hmToMins(b.start)) +
       " · " + (b.mins >= 60 ? (b.mins / 60) + "h" : b.mins + "m")));
-    if (b.sliderId) {
-      var sb = h("button", "sliderbtn");
-      sb.innerHTML = "<span>" + esc(sliderShort(b.sliderId)) + "</span>" +
-        (sliderTag(b.sliderId) ? "<span class='pill acc'>" + sliderTag(b.sliderId) + "</span>" : "") +
+    if (b.blockId) {
+      var sb = h("button", "blockbtn");
+      sb.innerHTML = "<span>" + esc(blockLabel(b.blockId)) + "</span>" +
         "<span class='dim'>›</span>";
-      on(sb, "click", function () { showSliderTasks(b.sliderId, b, date); });
+      on(sb, "click", function () { showBlockTasks(b.blockId, b, date); });
       head.appendChild(sb);
     } else {
-      head.appendChild(h("div", "dim", "No slider on this block — set one so its tasks show up here."));
+      head.appendChild(h("div", "dim", "No block set — choose one so its tasks show up here."));
     }
     body.appendChild(head);
 
@@ -909,15 +1244,15 @@ function showBlock(b, date) {
     ss.appendChild(h("div", "dim", "Same every time this block runs. Ticks reset with each new instance."));
     body.appendChild(ss);
 
-    /* tasks from the slider */
-    if (b.sliderId) {
-      var open = tasksFor(b.sliderId);
+    /* tasks from the block */
+    if (b.blockId) {
+      var open = tasksFor(b.blockId);
       var ts = h("div", "sec");
-      ts.appendChild(sechead("Tasks · " + sliderShort(b.sliderId), open.length + " open"));
-      if (!open.length) ts.appendChild(h("div", "empty", "Nothing waiting on this slider."));
+      ts.appendChild(sechead("Tasks · " + blockLabel(b.blockId), open.length + " open"));
+      if (!open.length) ts.appendChild(h("div", "empty", "Nothing waiting on this block."));
       open.slice(0, 6).forEach(function (t) { ts.appendChild(taskRow(t, function () { closeSheet(); showBlock(b, date); })); });
       var more = h("button", "btn ghost wide"); more.textContent = "All tasks & add new";
-      on(more, "click", function () { showSliderTasks(b.sliderId, b, date); });
+      on(more, "click", function () { showBlockTasks(b.blockId, b, date); });
       ts.appendChild(more);
       body.appendChild(ts);
     }
@@ -934,23 +1269,23 @@ function showBlock(b, date) {
   });
 }
 
-/* ---------------- slider task list ---------------- */
-function showSliderTasks(sliderId, b, date) {
-  var sl = slider(sliderId);
+/* ---------------- block task list ---------------- */
+function showBlockTasks(blockId, b, date) {
+  var sl = blockDef(blockId);
   openSheet(sl ? sl.name : "Tasks", function (body) {
     if (sl) {
       var p = project(sl.projectId);
       body.appendChild(h("div", "dim", esc(p ? p.name : "")));
     }
 
-    var open = tasksFor(sliderId);
-    var done = S.tasks.filter(function (t) { return t.sliderId === sliderId && t.done; });
+    var open = tasksFor(blockId);
+    var done = S.tasks.filter(function (t) { return t.blockId === blockId && t.done; });
 
     var sec = h("div", "sec");
     sec.appendChild(sechead("Waiting", open.length + " open"));
     if (!open.length) sec.appendChild(h("div", "empty", "Nothing waiting here.<br>That is allowed."));
     open.forEach(function (t) {
-      sec.appendChild(taskRow(t, function () { closeSheet(); showSliderTasks(sliderId, b, date); }));
+      sec.appendChild(taskRow(t, function () { closeSheet(); showBlockTasks(blockId, b, date); }));
     });
     body.appendChild(sec);
 
@@ -961,19 +1296,19 @@ function showSliderTasks(sliderId, b, date) {
     var go = h("button", "btn"); go.textContent = "Add";
     function commit() {
       if (!ti.value.trim()) return;
-      addTask({ sliderId: sliderId, title: ti.value.trim(), due: di.value || null });
-      closeSheet(); showSliderTasks(sliderId, b, date); render();
+      addTask({ blockId: blockId, title: ti.value.trim(), due: di.value || null });
+      closeSheet(); showBlockTasks(blockId, b, date); render();
     }
     on(go, "click", commit);
     on(ti, "keydown", function (e) { if (e.key === "Enter") commit(); });
     addWrap.appendChild(ti); addWrap.appendChild(di); addWrap.appendChild(go);
     body.appendChild(addWrap);
 
-    /* the milestones this slider rolls up to */
-    var ms = S.milestones.filter(function (m) { return sl && m.slider === sl.name && !m.done; });
+    /* the milestones this block rolls up to */
+    var ms = S.milestones.filter(function (m) { return sl && m.blockId === sl.id && !m.done; });
     if (ms.length) {
       var msec = h("div", "sec");
-      msec.appendChild(sechead("Milestones on this slider", ms.length + ""));
+      msec.appendChild(sechead("Milestones on this block", ms.length + ""));
       ms.forEach(function (m) { msec.appendChild(milestoneRow(m)); });
       body.appendChild(msec);
     }
@@ -982,26 +1317,28 @@ function showSliderTasks(sliderId, b, date) {
       var dsec = h("div", "sec");
       dsec.appendChild(sechead("Done", done.length + ""));
       done.slice(-8).reverse().forEach(function (t) {
-        dsec.appendChild(taskRow(t, function () { closeSheet(); showSliderTasks(sliderId, b, date); }));
+        dsec.appendChild(taskRow(t, function () { closeSheet(); showBlockTasks(blockId, b, date); }));
       });
       body.appendChild(dsec);
     }
 
     if (sl) {
       var g = h("div", "card");
-      g.appendChild(h("div", "eyebrow", "Graduation outcome"));
-      g.appendChild(h("div", "muted", esc(sl.outcome)));
+      g.appendChild(h("div", "eyebrow", sl.kind === "recurring"
+        ? (sl.flexible ? "Recurring — as many as fit the week" : "Recurring — " + sl.target + " a week")
+        : "Manual — scheduled when a date gets close"));
+      g.appendChild(h("div", "muted", esc(sl.definition)));
       body.appendChild(g);
     }
   });
 }
 
-/* accepts a mixed list — tasks have sliderId, milestones have term */
+/* accepts a mixed list — tasks have blockId, milestones have term */
 function showTaskList(title, list) {
   openSheet(title, function (body) {
     if (!list.length) body.appendChild(h("div", "empty", "Nothing here."));
     list.forEach(function (x) {
-      if (x.sliderId !== undefined) body.appendChild(taskRow(x, function () { closeSheet(); render(); }));
+      if (x.blockId !== undefined) body.appendChild(taskRow(x, function () { closeSheet(); render(); }));
       else body.appendChild(milestoneRow(x));
     });
   });
@@ -1023,7 +1360,7 @@ function taskRow(t, after) {
   var bd = h("div", "b");
   bd.appendChild(h("div", "t", esc(t.title)));
   var meta = h("div", "meta");
-  if (t.sliderId) meta.appendChild(h("span", "dim", esc(sliderShort(t.sliderId))));
+  if (t.blockId) meta.appendChild(h("span", "dim", esc(blockLabel(t.blockId))));
   if (t.due) {
     var st = milestoneStatus({ done: t.done, due: t.due });
     meta.appendChild(h("span", "pill " + st.cls, st.label));
@@ -1036,7 +1373,7 @@ function taskRow(t, after) {
 
 function showTask(t) {
   openSheet(t.title, function (body) {
-    var sl = t.sliderId ? slider(t.sliderId) : null;
+    var sl = t.blockId ? blockDef(t.blockId) : null;
     var p = sl ? project(sl.projectId) : (t.projectId ? project(t.projectId) : null);
     body.appendChild(h("div", "dim", (p ? p.name : "No project") + (sl ? " · " + sl.name : "")));
 
@@ -1048,8 +1385,8 @@ function showTask(t) {
     var l2 = h("label", "fld"); l2.appendChild(h("span", null, "Due")); l2.appendChild(di);
     body.appendChild(l2);
 
-    var sel = sliderSelect(t.sliderId);
-    var l3 = h("label", "fld"); l3.appendChild(h("span", null, "Slider")); l3.appendChild(sel);
+    var sel = blockSelect(t.blockId);
+    var l3 = h("label", "fld"); l3.appendChild(h("span", null, "Block")); l3.appendChild(sel);
     body.appendChild(l3);
 
     var nt = h("textarea"); nt.value = t.note || ""; nt.placeholder = "Notes — who, where, what specifically";
@@ -1061,8 +1398,8 @@ function showTask(t) {
       t.title = ti.value.trim() || t.title;
       t.due = di.value || null;
       t.note = nt.value;
-      t.sliderId = sel.value || null;
-      var s2 = t.sliderId ? slider(t.sliderId) : null;
+      t.blockId = sel.value || null;
+      var s2 = t.blockId ? blockDef(t.blockId) : null;
       t.projectId = s2 ? s2.projectId : null;
       save(); closeSheet(); render();
     });
@@ -1082,14 +1419,14 @@ function showTask(t) {
   });
 }
 
-/* a <select> of every slider, grouped by project */
-function sliderSelect(selectedId) {
+/* a <select> of every block, grouped by project */
+function blockSelect(selectedId) {
   var sel = h("select");
   sel.appendChild(new Option("— none —", ""));
   S.projects.forEach(function (p) {
     var g = document.createElement("optgroup");
     g.label = p.name;
-    slidersFor(p.id).forEach(function (s) {
+    blockDefsFor(p.id).forEach(function (s) {
       var o = new Option(s.name, s.id);
       if (s.id === selectedId) o.selected = true;
       g.appendChild(o);
@@ -1115,9 +1452,9 @@ function editBlock(b, date) {
     name.placeholder = "StudioVault, Anderson Block, Workout…";
     field("Label", name, "label");
 
-    var slSel = sliderSelect(b ? b.sliderId : null);
-    field("Slider", slSel, "slider");
-    body.appendChild(h("div", "dim", "The slider decides which task list this block opens."));
+    var slSel = blockSelect(b ? b.blockId : null);
+    field("Block", slSel, "block");
+    body.appendChild(h("div", "dim", "The block decides which task list this opens."));
 
     var sel = h("select");
     sel.appendChild(new Option("— none —", ""));
@@ -1127,9 +1464,9 @@ function editBlock(b, date) {
       sel.appendChild(o);
     });
     field("Project", sel, "project");
-    /* picking a slider settles the project — keep them in step */
+    /* picking a block settles the project — keep them in step */
     on(slSel, "change", function () {
-      var s = slSel.value ? slider(slSel.value) : null;
+      var s = slSel.value ? blockDef(slSel.value) : null;
       if (s) sel.value = s.projectId;
     });
 
@@ -1150,8 +1487,8 @@ function editBlock(b, date) {
     saveBtn.textContent = isNew ? "Add block" : "Save";
     on(saveBtn, "click", function () {
       var slId = slSel.value || null;
-      var label = name.value.trim() || (slId ? sliderShort(slId) : (sel.value ? project(sel.value).name : "Block"));
-      var patch = { projectId: sel.value || null, sliderId: slId, label: label,
+      var label = name.value.trim() || (slId ? blockLabel(slId) : (sel.value ? project(sel.value).name : "Block"));
+      var patch = { projectId: sel.value || null, blockId: slId, label: label,
                     start: st.value, mins: Math.max(15, +len.value || 60) };
       if (isNew || !b.fromTemplate) {
         if (!S.extras[k]) S.extras[k] = [];
@@ -1200,27 +1537,27 @@ function editBlock(b, date) {
 
 /* ============================ suggestions ============================
    No model, no key. Blocks are proposed from dates that already exist:
-   the 3-2-1 rule, an unscheduled project with something due, and a slider
+   the 3-2-1 rule, an unscheduled project with something due, and a block
    whose task list is stacking up. Every one is a button you press, never
    something the app does behind your back. */
 function suggestions() {
   var out = [], k = dkey(today());
 
-  function already(sliderId, byDate) {
+  function already(blockId, byDate) {
     for (var i = 0; i <= 14; i++) {
       var d = addDays(today(), i);
       if (byDate && dkey(d) > byDate) break;
-      var hit = blocksFor(d).some(function (b) { return b.sliderId === sliderId; });
+      var hit = blocksFor(d).some(function (b) { return b.blockId === blockId; });
       if (hit) return true;
     }
     return false;
   }
 
   /* milestones inside the 3-2-1 window, or due within a fortnight */
-  S.milestones.filter(function (m) { return !m.done && m.due; }).forEach(function (m) {
+  S.milestones.filter(function (m) { return !m.done && m.due && !m.tbd; }).forEach(function (m) {
     var n = daysBetween(k, m.due);
     if (n < 0 || n > 14) return;
-    var sl = S.sliders.filter(function (s) { return s.name === m.slider; })[0];
+    var sl = m.blockId ? blockDef(m.blockId) : null;
     var key = "ms:" + m.id;
     if (S.dismissed[key]) return;
     var tl = timeline(m.due);
@@ -1231,26 +1568,26 @@ function suggestions() {
       title: m.title,
       note: tl ? tl.want + " — your own 3-2-1 rule." : "Nothing is blocked for it yet.",
       cls: tl ? tl.cls : "",
-      sliderId: sl ? sl.id : null,
+      blockId: sl ? sl.id : null,
       projectId: m.projectId,
       by: m.due
     });
   });
 
-  /* tasks coming due with no block for their slider */
+  /* tasks coming due with no block scheduled */
   S.tasks.filter(function (t) { return !t.done && t.due; }).forEach(function (t) {
     var n = daysBetween(k, t.due);
     if (n < 0 || n > 7) return;
     var key = "task:" + t.id;
     if (S.dismissed[key]) return;
-    if (already(t.sliderId, t.due)) return;
+    if (already(t.blockId, t.due)) return;
     out.push({
       key: key, urgency: n + 0.5,
       head: n === 0 ? "Task due today" : "Task due in " + n + " day" + (n === 1 ? "" : "s"),
       title: t.title,
-      note: "No block for " + (t.sliderId ? sliderShort(t.sliderId) : "it") + " before then.",
+      note: "No block for " + (t.blockId ? blockLabel(t.blockId) : "it") + " before then.",
       cls: n <= 1 ? "bad" : "warn",
-      sliderId: t.sliderId, projectId: t.projectId, by: t.due
+      blockId: t.blockId, projectId: t.projectId, by: t.due
     });
   });
 
@@ -1273,7 +1610,7 @@ function proposeBlock(s) {
   var used = blocksFor(target).map(function (b) { return hmToMins(b.start); });
   var start = 19 * 60;
   while (used.indexOf(start) >= 0 && start < 22 * 60) start += 60;
-  S.extras[k].push({ key: uid(), projectId: s.projectId, sliderId: s.sliderId,
+  S.extras[k].push({ key: uid(), projectId: s.projectId, blockId: s.blockId,
                      label: s.title.slice(0, 40), start: minsToHM(start), mins: 90, kind: "project" });
   save();
   return target;
@@ -1306,7 +1643,7 @@ function viewPlan(root) {
     var c = h("div", "sugg");
     var top = h("div", "row");
     top.appendChild(h("span", "pill " + (s.cls || ""), s.head));
-    if (s.sliderId) top.appendChild(h("span", "dim", esc(sliderShort(s.sliderId))));
+    if (s.blockId) top.appendChild(h("span", "dim", esc(blockLabel(s.blockId))));
     c.appendChild(top);
     c.appendChild(h("div", "h-md", esc(s.title)));
     c.appendChild(h("div", "dim", esc(s.note)));
@@ -1336,7 +1673,7 @@ function viewPlan(root) {
     todays.forEach(function (b) {
       var cur = (S.checkins[tk] || {})[b.key];
       var row = h("div", "checkin");
-      row.appendChild(h("div", "n", esc(b.label) + (b.sliderId ? " <span class='dim'>· " + esc(sliderShort(b.sliderId)) + "</span>" : "")));
+      row.appendChild(h("div", "n", esc(b.label) + (b.blockId ? " <span class='dim'>· " + esc(blockLabel(b.blockId)) + "</span>" : "")));
       var opts = h("div", "row");
       [["yes", "Yes"], ["partly", "Partly"], ["no", "No"]].forEach(function (o) {
         var bt = h("button", "fchip"); bt.textContent = o[1];
@@ -1352,7 +1689,7 @@ function viewPlan(root) {
       if (cur === "no" || cur === "partly") {
         var again = h("button", "btn ghost sm"); again.textContent = "Book another run at it";
         on(again, "click", function () {
-          var when = proposeBlock({ projectId: b.projectId, sliderId: b.sliderId, title: b.label, by: null });
+          var when = proposeBlock({ projectId: b.projectId, blockId: b.blockId, title: b.label, by: null });
           toast("Added " + fmtDate(when));
           render();
         });
@@ -1544,7 +1881,18 @@ function viewProgress(root) {
     save(); toast("Pulled in this week's ticks"); render();
   });
   wg.appendChild(pull);
+  var lastPillar = null;
   S.projects.forEach(function (p) {
+    if (p.pillar !== lastPillar) {
+      lastPillar = p.pillar;
+      var pl = (S.pillars || []).filter(function (x) { return x.id === p.pillar; })[0];
+      if (pl) {
+        var ph = h("div", "parthead");
+        ph.appendChild(h("span", null, esc(pl.name)));
+        ph.appendChild(h("span", "dim mono", esc(pl.tag)));
+        wg.appendChild(ph);
+      }
+    }
     var l = h("label", "fld");
     var sp = h("span", null);
     var dot = h("span", "pdot"); dot.style.background = p.color; dot.style.marginRight = "6px";
@@ -1717,7 +2065,7 @@ function milestoneBoard(wrap) {
 
   /* projects reference */
   var ps = h("div", "sec");
-  ps.appendChild(sechead("Projects & sliders", S.projects.length + " projects"));
+  ps.appendChild(sechead("Projects & blocks", S.projects.length + " projects"));
   S.projects.forEach(function (p) {
     var open = S.milestones.filter(function (m) { return m.projectId === p.id && !m.done; }).length;
     var total = S.milestones.filter(function (m) { return m.projectId === p.id; }).length;
@@ -1726,7 +2074,9 @@ function milestoneBoard(wrap) {
     var dot = h("span", "pdot"); dot.style.background = p.color; ph.appendChild(dot);
     var t = h("div", null); t.style.flex = "1";
     t.appendChild(h("div", "h-md", esc(p.name)));
-    t.appendChild(h("div", "dim", (total - open) + " of " + total + " done · " + esc(p.priority)));
+    var pl = (S.pillars || []).filter(function (x) { return x.id === p.pillar; })[0];
+    t.appendChild(h("div", "dim", (total - open) + " of " + total + " done · " +
+      (pl ? pl.name + " · " : "") + esc(p.priority)));
     ph.appendChild(t);
     var chev = h("span", "dim", "›");
     ph.appendChild(chev);
@@ -1745,15 +2095,19 @@ function showProject(p) {
     var m = h("div", "muted"); m.style.fontFamily = "var(--display)"; m.style.fontSize = "16px";
     m.style.fontStyle = "italic"; m.textContent = "“" + p.mindset + "”";
     body.appendChild(m);
-    body.appendChild(h("div", "eyebrow", "Sliders"));
-    S.sliders.filter(function (s) { return s.projectId === p.id; }).forEach(function (s) {
+    var mine = S.blocks.filter(function (s) { return s.projectId === p.id; });
+    if (mine.length) body.appendChild(h("div", "eyebrow", "Blocks"));
+    mine.forEach(function (s) {
       var c = h("div", "card");
-      c.appendChild(h("div", "h-md", esc(s.name)));
+      var hd = h("div", "row");
+      hd.appendChild(h("div", "h-md", esc(s.name)));
+      hd.appendChild(h("span", "pill " + (s.kind === "recurring" ? "acc" : ""),
+        s.kind === "recurring" ? (s.flexible ? "recurring · as many as fit" : "recurring · " + s.target + "/wk") : "manual"));
+      c.appendChild(hd);
       c.appendChild(h("div", "dim", esc(s.definition)));
-      c.appendChild(h("div", "eyebrow", "Graduation outcome"));
-      c.appendChild(h("div", "muted", esc(s.outcome)));
       body.appendChild(c);
     });
+    if (!mine.length) body.appendChild(h("div", "dim", "Manual blocks only — this project is scheduled when a milestone date gets close."));
   });
 }
 
@@ -1956,8 +2310,7 @@ function observations() {
       note: "“" + due.title + "” is due in " + daysBetween(k, due.due) + " days and there is no block for this project in the next three weeks.",
       actLabel: "Block it",
       act: function () {
-        var sl = S.sliders.filter(function (s) { return s.name === due.slider; })[0];
-        var when = proposeBlock({ projectId: p.id, sliderId: sl ? sl.id : null, title: due.title, by: due.due });
+        var when = proposeBlock({ projectId: p.id, blockId: due.blockId || null, title: due.title, by: due.due });
         toast("Blocked " + fmtDate(when));
       }
     });
@@ -2089,7 +2442,22 @@ function viewRoutines(root) {
     var dn = list.filter(function (r) { return routineDone(r); }).length;
     var sec = h("div", "sec");
     sec.appendChild(sechead(pr[1], dn + "/" + list.length));
-    list.forEach(function (r) { sec.appendChild(routineRow(r)); });
+    var parts = [], byPart = {};
+    list.forEach(function (r) {
+      var p = r.part || "";
+      if (!byPart[p]) { byPart[p] = []; parts.push(p); }
+      byPart[p].push(r);
+    });
+    parts.forEach(function (p) {
+      if (p) {
+        var pd = byPart[p].filter(function (r) { return routineDone(r); }).length;
+        var ph = h("div", "parthead");
+        ph.appendChild(h("span", null, esc(p)));
+        ph.appendChild(h("span", "dim mono", pd + "/" + byPart[p].length));
+        sec.appendChild(ph);
+      }
+      byPart[p].forEach(function (r) { sec.appendChild(routineRow(r)); });
+    });
     wrap.appendChild(sec);
   });
   var back = h("button", "btn ghost wide"); back.textContent = "‹ Back to WWW";
@@ -2187,7 +2555,7 @@ function editTemplates() {
         var bar = h("span", "pdot"); bar.style.background = t.projectId ? projColor(t.projectId) : "var(--line-strong)";
         r.appendChild(bar);
         r.appendChild(h("div", "n", esc(t.label) + " <span class='dim mono'>" + minsToLabel(hmToMins(t.start)) + " · " + t.mins + "m</span>" +
-          (t.sliderId ? "<br><span class='dim'>" + esc(sliderShort(t.sliderId)) + "</span>" : "")));
+          (t.blockId ? "<br><span class='dim'>" + esc(blockLabel(t.blockId)) + "</span>" : "")));
         var x = h("button", "btn ghost sm"); x.textContent = "Remove";
         on(x, "click", function () {
           S.templates = S.templates.filter(function (q) { return q.id !== t.id; });
@@ -2202,18 +2570,18 @@ function editTemplates() {
       openSheet("New recurring block", function (b2) {
         var n = h("input"); n.type = "text"; n.placeholder = "Label";
         var day = h("select"); DAYNAMES.forEach(function (dn, i) { day.appendChild(new Option(dn, i)); });
-        var sl = sliderSelect(null);
+        var sl = blockSelect(null);
         var st = h("input"); st.type = "time"; st.value = "19:00";
         var mn = h("input"); mn.type = "number"; mn.value = 90; mn.step = 15; mn.min = 15;
-        [["Label", n], ["Day", day], ["Slider", sl], ["Start", st], ["Minutes", mn]].forEach(function (p) {
+        [["Label", n], ["Day", day], ["Block", sl], ["Start", st], ["Minutes", mn]].forEach(function (p) {
           var l = h("label", "fld"); l.appendChild(h("span", null, p[0])); l.appendChild(p[1]); b2.appendChild(l);
         });
         var go = h("button", "btn wide"); go.textContent = "Add";
         on(go, "click", function () {
-          var s = sl.value ? slider(sl.value) : null;
+          var s = sl.value ? blockDef(sl.value) : null;
           S.templates.push({ id: uid(), day: +day.value, projectId: s ? s.projectId : null,
-            sliderId: sl.value || null,
-            label: n.value.trim() || (s ? sliderShort(s.id) : "Block"),
+            blockId: sl.value || null,
+            label: n.value.trim() || (s ? blockLabel(s.id) : "Block"),
             start: st.value, mins: Math.max(15, +mn.value || 60), kind: "project" });
           save(); closeSheet(); render();
         });
@@ -2320,7 +2688,7 @@ function parseCapture(raw) {
   function cut(m, i) { if (m) cuts.push([m.index + (i || 0), m.index + m[0].length]); }
 
   var base = today();
-  var out = { title: "", kind: "note", sliderId: null, projectId: null,
+  var out = { title: "", kind: "note", blockId: null, projectId: null,
               due: null, date: null, start: null, mins: 90, repeatDay: null, raw: text };
 
   /* ---- recurrence ---- */
@@ -2437,13 +2805,13 @@ function parseCapture(raw) {
   });
   if (!best) {
     /* fall back to a literal slider or project name */
-    S.sliders.forEach(function (s) {
-      var n2 = sliderShort(s.id).toLowerCase();
+    S.blocks.forEach(function (s) {
+      var n2 = blockLabel(s.id).toLowerCase();
       if (n2.length > 3 && low.indexOf(n2) >= 0 && n2.length > bestScore) { bestScore = n2.length; best = s.id; }
     });
   }
-  out.sliderId = best;
-  if (best) { var sObj = slider(best); if (sObj) out.projectId = sObj.projectId; }
+  out.blockId = best;
+  if (best) { var sObj = blockDef(best); if (sObj) out.projectId = sObj.projectId; }
   out.confident = bestScore >= 5;
 
   /* ---- title: whatever is left ---- */
@@ -2553,9 +2921,9 @@ function previewCard(p) {
   var lt = h("label", "fld"); lt.appendChild(h("span", null, "Title")); lt.appendChild(title);
   el.appendChild(lt);
 
-  var slSel = sliderSelect(p.sliderId);
+  var slSel = blockSelect(p.blockId);
   var ls = h("label", "fld");
-  ls.appendChild(h("span", null, "Slider" + (p.sliderId && !p.confident ? " · low confidence" : "")));
+  ls.appendChild(h("span", null, "Block" + (p.blockId && !p.confident ? " · low confidence" : "")));
   ls.appendChild(slSel);
   el.appendChild(ls);
 
@@ -2605,18 +2973,18 @@ function previewCard(p) {
     var text = title.value.trim();
     if (!text) return false;
     var slId = slSel.value || null;
-    var sObj = slId ? slider(slId) : null;
+    var sObj = slId ? blockDef(slId) : null;
     var pid = sObj ? sObj.projectId : null;
 
     if (k === "task") {
-      addTask({ sliderId: slId, projectId: pid, title: text, due: dueI.value || null });
+      addTask({ blockId: slId, projectId: pid, title: text, due: dueI.value || null });
     } else if (k === "block") {
       var key = dateI.value || dkey(today());
       if (!S.extras[key]) S.extras[key] = [];
-      S.extras[key].push({ key: uid(), projectId: pid, sliderId: slId, label: text,
+      S.extras[key].push({ key: uid(), projectId: pid, blockId: slId, label: text,
                            start: startI.value, mins: Math.max(15, +minsI.value || 60), kind: "project" });
     } else if (k === "template") {
-      S.templates.push({ id: uid(), day: +daySel.value, projectId: pid, sliderId: slId,
+      S.templates.push({ id: uid(), day: +daySel.value, projectId: pid, blockId: slId,
                          label: text, start: startI.value, mins: Math.max(15, +minsI.value || 60), kind: "project" });
     } else if (k === "milestone") {
       S.milestones.push({ id: uid(), projectId: pid, slider: sObj ? sObj.name : null, title: text,
@@ -2697,7 +3065,11 @@ window.DETOUR = {
   save: save, render: render, toast: toast,
   openSheet: openSheet, closeSheet: closeSheet,
   h: h, on: on, esc: esc, uid: uid,
-  onSave: null            /* sync.js assigns this */
+  onSave: null,           /* sync.js assigns this */
+  /* internal seam — the scheduling core, so it can be exercised directly
+     rather than inferred from the DOM */
+  projectDay: projectDay, orderedItems: orderedItems, moveItem: moveItem,
+  pushItem: pushItem, routinesDueToday: routinesDueToday, pillarWeek: pillarWeek
 };
 
 /* re-render on the hour so "right now" stays honest */

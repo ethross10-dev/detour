@@ -71,49 +71,71 @@ If you later decide you want it native, the same folder wraps unchanged in Capac
 
 ---
 
+## Three pillars
+
+Detour is grouped into three pillars, and the metric of success is progress in **all three,
+every week** — not hours logged.
+
+| Pillar | What it is | Projects |
+|---|---|---|
+| **Progress** | the social simulation — connections, learning, staying well | Professional · Wellness |
+| **Play** | the RPG loop — archive what inspires you, understand it, then make your own | Archive · StudioVault · Music Prod |
+| **Preservation** | the save file — financial stability, and the story written down | Finances · Memoir |
+
+The strip at the top of WWW shows all three for the current week. Finances and Memoir carry no
+recurring blocks by design, so **closing a milestone or task counts as progress too** — otherwise
+Preservation could never register a week at all.
+
+## Blocks, not sliders
+
+Sliders described the Chicago era. In LA the unit is the **block**, and there are two kinds:
+
+- **Recurring** — expected every week. Skills you're practising to get better at: the Anderson
+  Block, Workouts, The Archive Block, Solo Music Prod. Each carries a weekly target, or is
+  marked *as many as fit* where that's the honest answer.
+- **Manual** — held when a milestone date is getting close. One-off, specific, not something to
+  grind weekly: Site Progress, Business Structure, WWO Music Prod.
+
 ## What's in it
 
 Five tabs.
 
-**WWW** — *Working While Working.* The calendar, and the reason the app exists. Outlook-shaped
-day and week grid: hour gutter, half-hour lines, a red now-line, overlapping blocks packed side
-by side. Every block carries a **project** and a **slider**, and the slider name on the block is
-a link into that slider's **task list**. Tapping the block opens **the routine** — a repeating
-checklist, same every instance, ticked fresh each time. On today's date it opens with what is
-running right now, and tells you to close the laptop when the day is clear.
+**WWW** — *Working While Working.* Three views: **Flow** (the default), **Grid** and **Week**.
 
-**Plan** — three things in one place. **Suggested blocks**, generated from dates that already
-exist: anything inside the 3-2-1 window, anything due within a fortnight with no block against
-it, any task coming due whose slider is unbooked. Each is a button you press — nothing moves on
-its own. Then the **Sunday ritual** in five steps. Then the **end-of-day check-in**: for each
-block that has finished, did you make the progress you wanted, and if not, book another run at
-it.
+**Flow** is the answer to the thing that makes calendars break. Items carry a **duration** and a
+**position**, not a start time. Only real appointments get **pinned** to the clock; everything
+else is projected from wherever you actually are right now. So running forty minutes over
+doesn't corrupt anything — the rest just slides, and a dashed line shows what will no longer
+fit before your day ends. You push it with one tap, or skip it with no guilt attached.
 
-**Reflect** — type it or dictate it (the browser's own speech recognition, no key). Below that,
-**what the app noticed**: a recurring block skipped three of the last four times it had your
-attention, a milestone overdue by more than a week, a week where you kept under half your
-blocks, a project with something due and nothing on the calendar. Each carries the change it
-would make; you approve or dismiss. It stays quiet until it has evidence — a day you never
-opened the app is not a day you failed.
+Anything whose slot passed more than two hours ago stops pretending it's still scheduled: it
+moves to **Missed earlier**, so an unticked 7:30am routine doesn't silently eat your evening.
 
-**Audit** — quarterly, at each Memento. The app assembles the brief from what actually
-happened: milestones done and overdue by project, block completion over twelve weeks, recent
-Sunday entries, reflections since last quarter, and five questions worth being asked. Copy it
-into Claude and let the conversation do the auditing.
+Grid is the Outlook-shaped calendar; Week is seven days at a glance.
 
-**Progress** — the Sunday survey. Weeks to graduation, what you got done per project, top five
-goals for next week, cool stuff from last week. **Pull in what the app already knows** fills
-the boxes from milestones, tasks and blocks you actually ticked that week, so you start from
-evidence instead of a blank page. Past weeks are kept. The full milestone list lives below it.
+**Plan** — suggested blocks generated from real due dates and the 3-2-1 rule, the Sunday
+ritual, and an end-of-day check-in per block.
 
-**Header** — `+` opens the plain-English assistant. `☰` has routines, the weekly template
-editor, all open tasks, notes, sync, theme and export/import.
+**Reflect** — dictate or type, then see what the app noticed in your own data, each with the
+change it would make. It stays quiet until it has evidence.
+
+**Audit** — quarterly, at each Memento. Assembles a brief from what actually happened for you
+to paste into Claude.
+
+**Progress** — the Sunday survey, grouped by pillar, pre-fillable from what you really ticked.
+The milestone list lives below it.
 
 ### The 3-2-1 rule
 
-Your own timeline policy, made mechanical. Anything with a due date is checked against it:
-three days out it should be **started**, two days out **in progress**, one day out
+Three days out it should be **started**, two days out **in progress**, one day out
 **completed**. Plan surfaces whatever is off-pace.
+
+### Routines
+
+Every item written out, resetting on its own period: morning (9), night (5 — three of them
+Monday, Wednesday and Thursday only), Sunday chores (11), monthly in five parts (31), and
+half-yearly in four (12). Routines are upkeep, so they're excluded from the weekly load
+warning and from pillar scoring — they'd drown everything else.
 
 ### Deliberately not in v0
 
