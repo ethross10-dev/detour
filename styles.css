@@ -206,6 +206,34 @@ button{font-family:inherit; color:inherit; cursor:pointer}
   letter-spacing:.11em; text-transform:uppercase; color:var(--text-3);
 }
 
+/* ---------- weekly meters ---------- */
+.meter{--pc:var(--line-strong); display:flex; align-items:center; gap:10px; padding:7px 2px}
+.meter .mn{flex:1; min-width:0; font-size:13.5px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+.meter .mbar{display:flex; gap:3px; flex:none}
+.meter .mbar i{width:14px; height:7px; border-radius:2px; background:var(--line); display:block}
+.meter .mbar i.on{background:var(--pc)}
+.meter .mv{font-family:var(--mono); font-size:10px; color:var(--text-3); width:30px; text-align:right}
+
+/* ---------- free windows ---------- */
+.capline{
+  display:flex; gap:7px; align-items:center; flex-wrap:wrap;
+  font-family:var(--mono); font-size:10px; color:var(--text-2);
+  padding:0 2px;
+}
+.window{
+  border:1px dashed var(--accent-line); border-radius:12px;
+  background:color-mix(in srgb, var(--accent) 4%, transparent);
+  padding:10px 12px; display:flex; flex-direction:column; gap:8px;
+}
+.window .wh{display:flex; align-items:baseline; gap:8px}
+.window .wt{font-family:var(--mono); font-size:11px; color:var(--accent)}
+.window .wm{font-family:var(--mono); font-size:10px; color:var(--text-3); margin-left:auto}
+.window .wbuf{font-size:12.5px; color:var(--text-3); line-height:1.4}
+.wrec{display:flex; gap:9px; align-items:center}
+.wrec .wb{flex:1; min-width:0}
+.wrec .wn{font-size:14px; font-weight:600; line-height:1.2}
+.wrec .wy{font-size:11px; color:var(--text-3); line-height:1.3}
+
 /* ---------- pillars ---------- */
 .pillars{display:grid; grid-template-columns:repeat(3,1fr); gap:8px}
 .pillar{

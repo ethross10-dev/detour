@@ -99,7 +99,7 @@ var LISTS = [
   ["refl", "reflections"],
   ["blk",  "blocks"]
 ];
-var PREFS = ["theme", "wwwMode"];   /* dayWindow rides along as p:dayWindow */
+var PREFS = ["theme", "wwwMode"];   /* settings rides along as p:settings */
 
 function flatten(S) {
   var f = {};
@@ -125,7 +125,7 @@ function flatten(S) {
   Object.keys(S.weekPlans || {}).forEach(function (k) { f["wp:" + k] = { v: S.weekPlans[k], i: 0 }; });
   Object.keys(S.blockRoutines || {}).forEach(function (k) { f["br:" + k] = { v: S.blockRoutines[k], i: 0 }; });
   Object.keys(S.flowOrder || {}).forEach(function (k) { f["fo:" + k] = { v: S.flowOrder[k], i: 0 }; });
-  f["p:dayWindow"] = { v: S.dayWindow, i: 0 };
+  f["p:settings"] = { v: S.settings, i: 0 };
   Object.keys(S.removed || {}).forEach(function (dk) {
     (S.removed[dk] || []).forEach(function (tid) { f["rm:" + dk + "|" + tid] = { v: 1, i: 0 }; });
   });

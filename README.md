@@ -102,16 +102,28 @@ Five tabs.
 
 **WWW** — *Working While Working.* Three views: **Flow** (the default), **Grid** and **Week**.
 
-**Flow** is the answer to the thing that makes calendars break. Items carry a **duration** and a
-**position**, not a start time. Only real appointments get **pinned** to the clock; everything
-else is projected from wherever you actually are right now. So running forty minutes over
-doesn't corrupt anything — the rest just slides, and a dashed line shows what will no longer
-fit before your day ends. You push it with one tap, or skip it with no guilt attached.
+The calendar holds three different kinds of thing, and they behave differently:
 
-Anything whose slot passed more than two hours ago stops pretending it's still scheduled: it
-moves to **Missed earlier**, so an unticked 7:30am routine doesn't silently eat your evening.
+| | What it is | How it behaves |
+|---|---|---|
+| **Anchors** | happen at a real time | pinned — morning and night routines, both classes |
+| **Manual blocks** | work toward a dated milestone | you schedule them as the date approaches |
+| **Recurring blocks** | ongoing investment in an area | a priority queue, offered into whatever time is actually free |
 
-Grid is the Outlook-shaped calendar; Week is seven days at a glance.
+Recurring blocks are **no longer pre-placed on the week**. They have a priority, a weekly target
+and a session length, and the engine offers them into real gaps. Free time shows as a capacity
+card — `4h 30m free · 2h 23m offerable · 2h 7m stays buffer` — with the top three blocks and a
+few words on why each. Nothing lands on the day until you press **Start**.
+
+The buffer is deliberate. At 75% density with an hour held back, the engine can never fill your
+day, so something running long costs you buffer rather than the plan.
+
+**Why that block:** an approaching milestone first, then a pillar the week has ignored, then
+whatever is furthest behind its weekly target. A block already done today drops out — unless a
+milestone is inside three days, which is the only time the same block is offered twice.
+
+Anything whose slot has passed moves to **Earlier today** rather than flowing into the evening:
+`missed` for something that could have moved, `passed` for an anchor that simply happened.
 
 **Plan** — suggested blocks generated from real due dates and the 3-2-1 rule, the Sunday
 ritual, and an end-of-day check-in per block.
@@ -129,6 +141,12 @@ The milestone list lives below it.
 
 Three days out it should be **started**, two days out **in progress**, one day out
 **completed**. Plan surfaces whatever is off-pace.
+
+### No hour estimates
+
+Milestones carry a due date and a checklist, not an estimate — you have not done most of these
+before, so an estimate would be a guess dressed as a plan. Schedule a block, work, and if it is
+not finished schedule another. A milestone shows how many blocks have actually gone into it.
 
 ### Routines
 

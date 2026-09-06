@@ -10,7 +10,7 @@ function freshState() {
   var seed = window.DETOUR_SEED;
   return {
     version: 1,
-    schema: 4,
+    schema: 5,
     createdAt: new Date().toISOString(),
     theme: "auto",
     wwwMode: "flow",
@@ -37,7 +37,7 @@ function freshState() {
     routineLog: {},   // "routineId|periodKey" -> iso
     weekPlans: {},    // weekKey -> {planned, at, meals, workouts, focus}
     flowOrder: {},    // dateKey -> [itemKey] — the order you dragged them into
-    dayWindow: { start: "07:00", end: "22:30" },
+    settings: clone(window.DETOUR_SEED.settings),
     notes: []         // {id, ts, text, projectId}
   };
 }
@@ -70,35 +70,43 @@ function migrate() {
      kept: block ticks, routine ticks, Sunday entries, reflections, notes,
      check-ins, and any one-off items you put on a day yourself. */
   if (S.schema < 4) {
+    S.pillars   = clone(seed.pillars);
+    S.projects  = clone(seed.projects);
+    S.milestones= clone(seed.milestones);
+    S.tasks     = clone(seed.tasks || []);
+    S.routines  = clone(seed.routines);
+    S.ninety    = clone(seed.ninety);
+    S.mementos  = clone(seed.mementos);
+    delete S.sliders; delete S.later; delete S.stopDoing; delete S.releases;
+    S.schema = 4;
+  }
+
+  /* → 5 : capacity, not a pre-filled grid.
+     The weekly template collapses to ANCHORS — the things that genuinely
+     happen at a time. Every other recurring block becomes a queue entry with
+     a priority and a weekly target, and the engine offers it into whatever
+     free time actually exists. Nothing lands on the calendar unless pressed. */
+  if (S.schema < 5) {
     var validBlocks = {};
     (seed.blocks || []).forEach(function (b) { validBlocks[b.id] = 1; });
 
-    S.pillars   = clone(seed.pillars);
-    S.projects  = clone(seed.projects);
-    S.blocks    = clone(seed.blocks);
-    S.milestones= clone(seed.milestones);
-    S.tasks     = clone(seed.tasks || []);
-    S.templates = clone(seed.blockTemplates);
-    S.routines  = clone(seed.routines);
-    S.blockRoutines = clone(seed.blockRoutines || {});
-    S.ninety    = clone(seed.ninety);
-    S.mementos  = clone(seed.mementos);
+    S.blocks    = clone(seed.blocks);          /* carries priority, sessions, min/ideal */
+    S.templates = clone(seed.blockTemplates);  /* anchors + the few real rhythms */
+    S.blockRoutines = Object.assign(clone(seed.blockRoutines || {}), S.blockRoutines || {});
+    S.settings  = clone(seed.settings);
 
-    /* one-off items you added yourself survive, but a reference to a block
-       that no longer exists would dangle — clear those rather than orphan */
     Object.keys(S.extras || {}).forEach(function (dk) {
       (S.extras[dk] || []).forEach(function (x) {
         if (x.blockId === undefined && x.sliderId !== undefined) { x.blockId = x.sliderId; delete x.sliderId; }
-        if (!x.blockId || !validBlocks[x.blockId]) x.blockId = null;
+        if (x.blockId === "k-sv-archive") { /* renamed, id unchanged */ }
+        if (x.blockId && !validBlocks[x.blockId]) x.blockId = null;
         if (x.pin === undefined) x.pin = false;
       });
     });
-
-    delete S.sliders; delete S.later; delete S.stopDoing; delete S.releases;
+    delete S.dayWindow;
     if (!S.flowOrder) S.flowOrder = {};
-    if (!S.dayWindow) S.dayWindow = { start: "07:00", end: "22:30" };
     S.wwwMode = "flow";
-    S.schema = 4;
+    S.schema = 5;
     save();
   }
 
@@ -108,7 +116,7 @@ function migrate() {
   ["blockRoutines","stamps","tombs","checkins","dismissed","flowOrder"].forEach(function (k) {
     if (!S[k]) S[k] = {};
   });
-  if (!S.dayWindow) S.dayWindow = { start: "07:00", end: "22:30" };
+  if (!S.settings) S.settings = clone(window.DETOUR_SEED.settings);
   if (!S.wwwMode) S.wwwMode = "flow";
   if (!S.clock) S.clock = 0;
 }
@@ -312,8 +320,14 @@ function routinesDueToday() {
    over just slides the rest down. Nothing breaks; the overflow line moves
    up, and you decide what falls off the end. */
 
-function dayStartMins() { return hmToMins((S.dayWindow && S.dayWindow.start) || "07:00"); }
-function dayEndMins()   { return hmToMins((S.dayWindow && S.dayWindow.end)   || "22:30"); }
+function winFor(date) {
+  var w = (S.settings || {});
+  var d = date.getDay();
+  var side = (d === 0 || d === 6) ? w.weekend : w.weekday;
+  return side || { start: "07:00", end: "22:00" };
+}
+function dayStartMins(date) { return hmToMins(winFor(date || today()).start); }
+function dayEndMins(date)   { return hmToMins(winFor(date || today()).end); }
 
 /* the order you put things in, falling back to preferred time */
 function orderedItems(date) {
@@ -349,14 +363,14 @@ function projectDay(date) {
   var k = dkey(date);
   var items = orderedItems(date);
   var isToday = sameDay(date, today());
-  var cursor = dayStartMins();
+  var cursor = dayStartMins(date);
   if (isToday) cursor = Math.max(cursor, nowMins());
 
   var pins = items.filter(function (b) { return b.pin; })
     .map(function (b) { return { s: hmToMins(b.start), e: hmToMins(b.start) + b.mins }; })
     .sort(function (a, b) { return a.s - b.s; });
 
-  var endBy = dayEndMins(), out = [];
+  var endBy = dayEndMins(date), out = [];
 
   var STALE_AFTER = 120;   /* minutes past its natural slot before we stop pretending */
 
@@ -368,9 +382,10 @@ function projectDay(date) {
     }
     /* A morning routine still unticked at 4pm did not move to 4pm — it was
        missed. Say so, and leave the evening to the work that is still live. */
-    if (isToday && !b.pin && hmToMins(b.start) + b.mins + STALE_AFTER < nowMins()) {
+    var pastBy = nowMins() - (hmToMins(b.start) + b.mins);
+    if (isToday && (b.pin ? pastBy > 0 : pastBy > STALE_AFTER)) {
       out.push({ b: b, done: false, skipped: false, stale: true,
-                 start: null, end: null, pinned: false, was: hmToMins(b.start) });
+                 start: null, end: null, pinned: !!b.pin, was: hmToMins(b.start) });
       return;
     }
     var start, end;
@@ -405,6 +420,137 @@ function pushItem(b, fromDate, toDate) {
   if (!S.extras[tk]) S.extras[tk] = [];
   S.extras[tk].push({ key: uid(), projectId: b.projectId, blockId: b.blockId, label: b.label,
                       start: b.start, mins: b.mins, kind: b.kind, pin: false });
+  save();
+}
+
+/* ============================ capacity ============================
+   Free time is what is left after the anchors, minus a share you never
+   allocate. Ethan's worry was that a full calendar shatters the moment
+   something runs long, so the engine is only ever allowed to offer into
+   part of the gap — the rest is buffer, and buffer is not failed planning. */
+
+function placedSpans(date) {
+  return projectDay(date)
+    .filter(function (r) { return !r.stale && !r.skipped && r.start !== null; })
+    .map(function (r) { return { s: r.start, e: r.end }; })
+    .sort(function (a, b) { return a.s - b.s; });
+}
+
+function freeWindows(date) {
+  var lo = dayStartMins(date), hi = dayEndMins(date);
+  if (sameDay(date, today())) lo = Math.max(lo, nowMins());
+  var spans = placedSpans(date), out = [], cur = lo;
+  spans.forEach(function (sp) {
+    if (sp.s > cur) out.push({ start: cur, end: Math.min(sp.s, hi) });
+    cur = Math.max(cur, sp.e);
+  });
+  if (cur < hi) out.push({ start: cur, end: hi });
+  return out.filter(function (w) { return w.end - w.start >= minSession(); })
+            .map(function (w) { return { start: w.start, end: w.end, mins: w.end - w.start }; });
+}
+function minSession() { return (S.settings && S.settings.minSession) || 30; }
+
+/* how much of a window the engine may actually offer */
+function plannable(date) {
+  var st = S.settings || {};
+  var free = freeWindows(date).reduce(function (a, w) { return a + w.mins; }, 0);
+  return Math.max(0, Math.round(free * (st.density || 0.75)) - (st.bufferMins || 60));
+}
+
+/* ============================ the queue ============================
+   Sessions kept per block this week, against the target from the survey. */
+function weekStats(weekStart) {
+  var out = {};
+  S.blocks.forEach(function (b) { out[b.id] = { done: 0, target: b.weeklyTarget || 0 }; });
+  for (var i = 0; i < 7; i++) {
+    var d = addDays(weekStart, i), k = dkey(d);
+    blocksFor(d).forEach(function (b) {
+      if (!b.blockId || !out[b.blockId]) return;
+      if (blockState(k, b.key).done) out[b.blockId].done++;
+    });
+  }
+  return out;
+}
+
+function doneToday(date, blockId) {
+  var k = dkey(date);
+  return blocksFor(date).some(function (b) {
+    return b.blockId === blockId && blockState(k, b.key).done;
+  });
+}
+function scheduledToday(date, blockId) {
+  return blocksFor(date).some(function (b) { return b.blockId === blockId; });
+}
+
+/* a milestone in this project that is inside the 3-2-1 window */
+function urgentFor(projectId) {
+  var k = dkey(today()), best = null;
+  S.milestones.forEach(function (m) {
+    if (m.done || m.tbd || !m.due || m.projectId !== projectId) return;
+    var n = daysBetween(k, m.due);
+    if (n < 0 || n > 3) return;
+    if (!best || n < daysBetween(k, best.due)) best = m;
+  });
+  return best;
+}
+
+/* Ranked, with a short reason. Never places anything — you press Start.
+   Order: an urgent milestone, then a pillar with nothing yet this week,
+   then priority among the under-served, then anything already at target. */
+function recommend(date, windowMins) {
+  var stats = weekStats(weekStartOf(date));
+  var pw = pillarWeek(weekStartOf(date));
+  var out = [];
+  /* At the start of a week nothing has been touched, so "untouched" would be
+     true of everything and tell you nothing. The floor only means something
+     once the week is lopsided. */
+  var anyTouched = (S.pillars || []).some(function (p) { return pw[p.id] && pw[p.id].touched; });
+
+  S.blocks.forEach(function (b) {
+    if (b.kind !== "recurring" || b.anchor) return;
+    if (!b.weeklyTarget) return;
+    var st = stats[b.id] || { done: 0, target: 0 };
+    var urgent = urgentFor(b.projectId);
+
+    /* one a day, unless a deadline is genuinely pressing — his rule */
+    if (doneToday(date, b.id) && !urgent) return;
+    if (scheduledToday(date, b.id) && !urgent) return;
+
+    var mins = Math.min(b.idealSession, windowMins || b.idealSession);
+    if (mins < b.minSession) return;
+
+    var pil = pillarOf(b.projectId);
+    var pillarCold = anyTouched && pil && pw[pil] && !pw[pil].touched;
+    var behind = st.done < st.target;
+
+    var rank, why;
+    if (urgent) {
+      rank = 0 + daysBetween(dkey(today()), urgent.due) / 10;
+      why = "milestone in " + daysBetween(dkey(today()), urgent.due) + "d";
+    } else if (pillarCold && behind) {
+      rank = 1 + b.priority / 100;
+      why = (S.pillars.filter(function (p) { return p.id === pil; })[0] || {}).name + " untouched this week";
+    } else if (behind) {
+      rank = 2 + b.priority / 100;
+      why = st.done + "/" + st.target + " this week";
+    } else {
+      rank = 5 + b.priority / 100;
+      why = "target met — only if there's room";
+    }
+    out.push({ block: b, mins: mins, why: why, rank: rank, done: st.done, target: st.target, urgent: urgent });
+  });
+
+  out.sort(function (a, b) { return a.rank - b.rank; });
+  return out;
+}
+
+/* put a recommended block on the day at a real time — the "Start" step */
+function placeRecommendation(rec, date, startMins) {
+  var k = dkey(date);
+  if (!S.extras[k]) S.extras[k] = [];
+  S.extras[k].push({ key: uid(), projectId: rec.block.projectId, blockId: rec.block.id,
+                     label: rec.block.name, start: minsToHM(startMins),
+                     mins: rec.mins, kind: "project", pin: false });
   save();
 }
 
@@ -605,7 +751,7 @@ function nowHero(d) {
     hero.appendChild(h("div", "lab", live ? "Right now" : "Up next · " + minsToLabel(nextAt)));
     hero.appendChild(h("div", "big", esc(b.label)));
     if (b.blockId && blockLabel(b.blockId) !== b.label) hero.appendChild(h("div", "sub", esc(blockLabel(b.blockId))));
-    var fo = blockFocus(b);
+    var fo = (b.kind === "routine" || b.kind === "class") ? null : blockFocus(b);
     if (fo) hero.appendChild(h("div", "sub", "→ " + esc(fo.title)));
     else if (b.kind === "ritual") hero.appendChild(h("div", "sub", "The whole week gets decided here."));
     var act = h("div", "row"); act.style.marginTop = "4px";
@@ -730,6 +876,24 @@ function milestoneRow(m) {
   return row;
 }
 
+/* How much has actually gone into a milestone. Not a budget to burn down —
+   there is no estimate to burn down against — just what happened. */
+function blocksSpentOn(m) {
+  var count = 0, mins = 0, last = null;
+  if (!m.blockId && !m.projectId) return { count: 0, mins: 0, last: null };
+  Object.keys(S.blockState || {}).forEach(function (dk) {
+    var day = parseKey(dk);
+    blocksFor(day).forEach(function (b) {
+      if (!blockState(dk, b.key).done) return;
+      var hit = m.blockId ? b.blockId === m.blockId : b.projectId === m.projectId;
+      if (!hit) return;
+      count++; mins += b.mins;
+      if (!last || dk > last) last = dk;
+    });
+  });
+  return { count: count, mins: mins, last: last };
+}
+
 function showMilestone(m) {
   openSheet(m.title, function (body) {
     var p = project(m.projectId);
@@ -743,6 +907,22 @@ function showMilestone(m) {
       "<b>Window</b> " + esc(m.term) + "<br>" +
       "<b>Target</b> " + (m.due ? esc(m.due) : "ongoing")));
     body.appendChild(g);
+    var spent = blocksSpentOn(m);
+    if (spent.count) {
+      body.appendChild(h("div", "eyebrow", "Work so far"));
+      body.appendChild(h("div", "muted", spent.count + " block" + (spent.count === 1 ? "" : "s") +
+        " · " + fmtDur(spent.mins) + " · last on " + fmtDate(parseKey(spent.last))));
+    }
+    var sched = h("button", "btn wide");
+    sched.textContent = "Schedule a block for this";
+    on(sched, "click", function () {
+      var when = proposeBlock({ projectId: m.projectId, blockId: m.blockId || null, title: m.title, by: m.due });
+      closeSheet(); toast("Added " + fmtDate(when));
+      wwwCursor = when; S.wwwMode = "flow"; save(); view = "www"; render();
+    });
+    body.appendChild(sched);
+    body.appendChild(h("div", "dim", "No hour estimate — you have not done these before. Schedule a block, work, and if it is not finished, schedule another."));
+
     var lab = h("label", "fld");
     lab.appendChild(h("span", null, "Target date"));
     var inp = h("input"); inp.type = "date"; inp.value = m.due || "";
@@ -804,8 +984,9 @@ function viewWWW(root) {
   bar.appendChild(prev); bar.appendChild(nowb); bar.appendChild(next);
   wrap.appendChild(bar);
 
-  /* --- the week's pillar balance: the stated metric of success --- */
-  wrap.appendChild(pillarStrip(weekStartOf(wwwCursor)));
+  /* --- Sunday only: the week's balance. Every other day it just drives
+         the recommendations quietly, which is what he asked for. --- */
+  if (wwwCursor.getDay() === 0 || isWeek) wrap.appendChild(pillarStrip(weekStartOf(wwwCursor)));
 
   /* --- what's running right now, on today only --- */
   if (!isWeek && sameDay(wwwCursor, today())) wrap.appendChild(nowHero(wwwCursor));
@@ -870,18 +1051,28 @@ function buildFlow(date) {
 
   var head = h("div", "flowhead");
   head.appendChild(h("span", "eyebrow", isToday
-    ? "flowing from " + minsToLabel(Math.max(dayStartMins(), nowMins()))
-    : "from " + minsToLabel(dayStartMins())));
+    ? "flowing from " + minsToLabel(Math.max(dayStartMins(date), nowMins()))
+    : "from " + minsToLabel(dayStartMins(date))));
   var win = h("button", "btn ghost sm");
-  win.textContent = "ends by " + minsToLabel(dayEndMins());
+  win.textContent = "ends by " + minsToLabel(dayEndMins(date));
   on(win, "click", editDayWindow);
   head.appendChild(win);
   wrap.appendChild(head);
 
+  var cap = h("div", "capline");
+  var freeM = freeWindows(date).reduce(function (a, w) { return a + w.mins; }, 0);
+  var plan = plannable(date);
+  cap.appendChild(h("span", null, fmtDur(freeM) + " free"));
+  cap.appendChild(h("span", "dim", "·"));
+  cap.appendChild(h("span", null, fmtDur(Math.max(0, plan)) + " offerable"));
+  cap.appendChild(h("span", "dim", "·"));
+  cap.appendChild(h("span", "dim", fmtDur(Math.max(0, freeM - plan)) + " stays buffer"));
+  wrap.appendChild(cap);
+
   if (stale.length) {
     var sh = h("div", "sec");
-    sh.appendChild(sechead("Missed earlier", stale.length + ""));
-    sh.appendChild(h("div", "dim", "Their slot has passed. Do one now, push it, or skip it — they are not holding up the rest of the day."));
+    sh.appendChild(sechead("Earlier today", stale.length + ""));
+    sh.appendChild(h("div", "dim", "Their slot has passed. Tick what you did, push what you still want, skip the rest — none of it is holding up the day."));
     stale.forEach(function (r, i) { sh.appendChild(flowRow(r, date, -1, 0)); });
     wrap.appendChild(sh);
   }
@@ -890,21 +1081,87 @@ function buildFlow(date) {
   }
 
   var shownOverflow = false;
+  var budget = plannable(date);
+  var cursor = dayStartMins(date);
+  if (isToday) cursor = Math.max(cursor, nowMins());
+
+  /* Walk the day once, dropping a capacity card into every real gap —
+     including the one before the first live item, which is usually the
+     biggest one you have. */
+  function gapTo(edge) {
+    if (edge - cursor >= minSession()) {
+      wrap.appendChild(windowCard(date, { start: cursor, end: edge, mins: edge - cursor }, budget));
+    }
+  }
+
   rows.forEach(function (r, idx) {
     if (r.overflow && !shownOverflow) {
       shownOverflow = true;
       var div = h("div", "overflowline");
-      div.appendChild(h("span", null, "won't fit before " + minsToLabel(dayEndMins())));
+      div.appendChild(h("span", null, "won't fit before " + minsToLabel(dayEndMins(date))));
       wrap.appendChild(div);
     }
+    var live = !r.done && !r.skipped && !r.stale && r.start !== null;
+    if (live) { gapTo(r.start); }
     wrap.appendChild(flowRow(r, date, idx, rows.length));
+    if (live) cursor = Math.max(cursor, r.end);
   });
+  gapTo(dayEndMins(date));
 
   var add = h("button", "btn ghost wide");
   add.textContent = "+ Add to " + (isToday ? "today" : fmtDate(date));
   on(add, "click", function () { editBlock(null, date); });
   wrap.appendChild(add);
   return wrap;
+}
+
+/* A gap is not an empty slot to be filled — it is capacity, most of which
+   stays yours. The card offers the top few blocks and says why; nothing
+   lands on the day until Start is pressed. */
+function windowCard(date, win, budget) {
+  var el = h("div", "window");
+  var offerable = Math.min(win.mins, Math.max(0, budget));
+  var head = h("div", "wh");
+  head.appendChild(h("span", "wt", minsToLabel(win.start) + "–" + minsToLabel(win.end)));
+  head.appendChild(h("span", "wm", fmtDur(win.mins) + " open"));
+  el.appendChild(head);
+
+  if (offerable < minSession()) {
+    el.appendChild(h("div", "wbuf", "Buffer. You have already planned as much of today as the density allows."));
+    return el;
+  }
+
+  var recs = recommend(date, offerable).slice(0, 3);
+  if (!recs.length) {
+    el.appendChild(h("div", "wbuf", "Nothing under-served that fits here. Yours."));
+    return el;
+  }
+  recs.forEach(function (r) {
+    var row = h("div", "wrec");
+    var dot = h("span", "pdot"); dot.style.background = projColor(r.block.projectId);
+    row.appendChild(dot);
+    var b = h("div", "wb");
+    b.appendChild(h("div", "wn", esc(r.block.name)));
+    b.appendChild(h("div", "wy", esc(r.why) + " · " + fmtDur(r.mins)));
+    row.appendChild(b);
+    var go = h("button", "btn sm"); go.textContent = "Start";
+    on(go, "click", function () {
+      placeRecommendation(r, date, win.start);
+      toast(r.block.name + " · " + minsToLabel(win.start));
+      render();
+    });
+    row.appendChild(go);
+    el.appendChild(row);
+  });
+  var man = h("button", "btn ghost sm"); man.textContent = "Something else";
+  on(man, "click", function () { editBlock(null, date); });
+  el.appendChild(man);
+  return el;
+}
+
+function fmtDur(m) {
+  if (m >= 60) { var hh = Math.floor(m / 60), mm = m % 60; return hh + "h" + (mm ? " " + mm + "m" : ""); }
+  return m + "m";
 }
 
 function flowRow(r, date, idx, total) {
@@ -930,7 +1187,8 @@ function flowRow(r, date, idx, total) {
   var meta = h("div", "fm");
   if (r.done) meta.appendChild(h("span", "dim", "done"));
   else if (r.skipped) meta.appendChild(h("span", "dim", "skipped"));
-  else if (r.stale) meta.appendChild(h("span", "pill warn", "missed · " + minsToLabel(r.was)));
+  else if (r.stale) meta.appendChild(h("span", "pill " + (r.pinned ? "" : "warn"),
+    (r.pinned ? "passed · " : "missed · ") + minsToLabel(r.was)));
   else if (r.pinned) meta.appendChild(h("span", "pill acc", minsToLabel(r.start) + " pinned"));
   else meta.appendChild(h("span", "when", "≈ " + minsToLabel(r.start) + "–" + minsToLabel(r.end)));
   meta.appendChild(h("span", "dim mono", b.mins >= 60 ? (b.mins / 60) + "h" : b.mins + "m"));
@@ -1000,14 +1258,26 @@ function itemMenu(b, date) {
 function editDayWindow() {
   openSheet("Day window", function (body) {
     body.appendChild(h("div", "muted", "Flow projects from the first time and warns you at the second. Nothing is enforced — the line just tells you what will not fit."));
-    var a = h("input"); a.type = "time"; a.value = (S.dayWindow && S.dayWindow.start) || "07:00";
-    var b2 = h("input"); b2.type = "time"; b2.value = (S.dayWindow && S.dayWindow.end) || "22:30";
-    var l1 = h("label", "fld"); l1.appendChild(h("span", null, "Day starts")); l1.appendChild(a);
-    var l2 = h("label", "fld"); l2.appendChild(h("span", null, "Ends by")); l2.appendChild(b2);
-    body.appendChild(l1); body.appendChild(l2);
+    var st = S.settings, fields = [];
+    [["Weekday starts","weekday","start"],["Weekday ends by","weekday","end"],
+     ["Weekend starts","weekend","start"],["Weekend ends by","weekend","end"]].forEach(function (f) {
+      var i = h("input"); i.type = "time"; i.value = st[f[1]][f[2]];
+      var l = h("label", "fld"); l.appendChild(h("span", null, f[0])); l.appendChild(i);
+      body.appendChild(l); fields.push([f[1], f[2], i]);
+    });
+    var dens = h("input"); dens.type = "number"; dens.min = 25; dens.max = 100; dens.step = 5;
+    dens.value = Math.round((st.density || 0.75) * 100);
+    var l3 = h("label", "fld"); l3.appendChild(h("span", null, "Planning density (%)")); l3.appendChild(dens);
+    body.appendChild(l3);
+    body.appendChild(h("div", "dim", "The engine never offers more than this share of your free time. The rest is buffer — meals running long, a conversation, deciding to see someone."));
+    var buf = h("input"); buf.type = "number"; buf.min = 0; buf.step = 15; buf.value = st.bufferMins || 60;
+    var l4 = h("label", "fld"); l4.appendChild(h("span", null, "Untouchable buffer (mins/day)")); l4.appendChild(buf);
+    body.appendChild(l4);
     var sv = h("button", "btn wide"); sv.textContent = "Save";
     on(sv, "click", function () {
-      S.dayWindow = { start: a.value || "07:00", end: b2.value || "22:30" };
+      fields.forEach(function (f) { if (f[2].value) S.settings[f[0]][f[1]] = f[2].value; });
+      S.settings.density = Math.max(0.25, Math.min(1, (+dens.value || 75) / 100));
+      S.settings.bufferMins = Math.max(0, +buf.value || 0);
       save(); closeSheet(); render();
     });
     body.appendChild(sv);
@@ -1845,6 +2115,38 @@ function weekHarvest(weekStart) {
   return out;
 }
 
+/* ---------------- weekly satisfaction ----------------
+   Sessions kept against the target you set, worst first. Shown on Sunday
+   and in Progress — not every day, where it would just be a second job. */
+function meterBoard(weekStart) {
+  var stats = weekStats(weekStart);
+  var sec = h("div", "sec");
+  var list = S.blocks.filter(function (b) {
+    return b.kind === "recurring" && b.weeklyTarget > 0;
+  }).sort(function (a, b) {
+    var sa = stats[a.id], sb = stats[b.id];
+    var ra = sa.target ? sa.done / sa.target : 1, rb = sb.target ? sb.done / sb.target : 1;
+    return ra - rb || a.priority - b.priority;
+  });
+  var hit = list.filter(function (b) { return stats[b.id].done >= stats[b.id].target; }).length;
+  sec.appendChild(sechead("This week's Detour", hit + "/" + list.length + " at target"));
+  list.forEach(function (b) {
+    var st = stats[b.id];
+    var row = h("div", "meter");
+    row.style.setProperty("--pc", projColor(b.projectId));
+    row.appendChild(h("div", "mn", esc(b.name)));
+    var bar = h("div", "mbar");
+    for (var i = 0; i < st.target; i++) {
+      var pip = h("i", i < st.done ? "on" : "");
+      bar.appendChild(pip);
+    }
+    row.appendChild(bar);
+    row.appendChild(h("div", "mv", st.done + "/" + st.target));
+    sec.appendChild(row);
+  });
+  return sec;
+}
+
 /* ---------------- PROGRESS ---------------- */
 function viewProgress(root) {
   document.getElementById("tbsub").textContent = "Progress";
@@ -1860,6 +2162,10 @@ function viewProgress(root) {
   var head = h("div", "stack g6");
   head.appendChild(h("div", "eyebrow", "Every Sunday"));
   head.appendChild(h("div", "h-lg", weeksToGrad() + " weeks until<br>Anderson graduation"));
+  wrap.appendChild(head);
+  wrap.appendChild(pillarStrip(ws));
+  wrap.appendChild(meterBoard(ws));
+  head = h("div", "stack g6");
   head.appendChild(h("div", "muted", "Week of " + fmtDate(ws) + ". " +
     (entry.at ? "Filled in " + new Date(entry.at).toLocaleDateString() + "." : "Not filled in yet.")));
   wrap.appendChild(head);
@@ -3066,6 +3372,8 @@ window.DETOUR = {
   openSheet: openSheet, closeSheet: closeSheet,
   h: h, on: on, esc: esc, uid: uid,
   onSave: null,           /* sync.js assigns this */
+  freeWindows: freeWindows, plannable: plannable, recommend: recommend,
+  weekStats: weekStats,
   /* internal seam — the scheduling core, so it can be exercised directly
      rather than inferred from the DOM */
   projectDay: projectDay, orderedItems: orderedItems, moveItem: moveItem,
